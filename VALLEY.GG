@@ -911,24 +911,6 @@ local function createMobileFriendlyUI()
     DupeTabCorner.CornerRadius = UDim.new(0, 6)
     DupeTabCorner.Parent = DupeTabButton
     
-    -- Quick Buy Tab Button
-    local QuickBuyTabButton = Instance.new("TextButton")
-    QuickBuyTabButton.Name = "QuickBuyTabButton"
-    QuickBuyTabButton.Text = "🚀 QUICK BUY"
-    QuickBuyTabButton.Font = Enum.Font.GothamSemibold
-    QuickBuyTabButton.TextSize = buttonTextSize
-    QuickBuyTabButton.TextColor3 = Color3.fromRGB(255, 140, 0)
-    QuickBuyTabButton.BackgroundColor3 = Color3.fromRGB(60, 40, 20)
-    QuickBuyTabButton.BorderColor3 = Color3.fromRGB(100, 60, 30)
-    QuickBuyTabButton.BorderSizePixel = 2
-    QuickBuyTabButton.Position = UDim2.new(0.5, 2, 0, 0)
-    QuickBuyTabButton.Size = UDim2.new(0.5, -2, 1, 0)
-    QuickBuyTabButton.Parent = TabsContainer
-    
-    local QuickBuyTabCorner = Instance.new("UICorner")
-    QuickBuyTabCorner.CornerRadius = UDim.new(0, 6)
-    QuickBuyTabCorner.Parent = QuickBuyTabButton
-    
     -- Tab Content Area
     local TabContentArea = Instance.new("Frame")
     TabContentArea.Name = "TabContentArea"
@@ -954,72 +936,6 @@ local function createMobileFriendlyUI()
     DupeButtonsContainer.ScrollBarThickness = (isMobile and 6 or 4) * deviceInfo.buttonScale
     DupeButtonsContainer.ScrollBarImageColor3 = Color3.fromRGB(100, 50, 200)
     DupeButtonsContainer.Parent = DupeContent
-    
-    -- ===== QUICK BUY TAB CONTENT =====
-    local QuickBuyContent = Instance.new("Frame")
-    QuickBuyContent.Name = "QuickBuyContent"
-    QuickBuyContent.BackgroundTransparency = 1
-    QuickBuyContent.Size = UDim2.new(1, 0, 1, 0)
-    QuickBuyContent.Visible = false
-    QuickBuyContent.Parent = TabContentArea
-    
-    -- Gun List Container
-    local GunListContainer = Instance.new("ScrollingFrame")
-    GunListContainer.Name = "GunListContainer"
-    GunListContainer.BackgroundTransparency = 1
-    GunListContainer.Size = UDim2.new(1, 0, 0.6, 0)
-    GunListContainer.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be updated
-    GunListContainer.ScrollBarThickness = 6 * deviceInfo.buttonScale
-    GunListContainer.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 0)
-    GunListContainer.Parent = QuickBuyContent
-    
-    -- Purchase Button (Orange theme)
-    local PurchaseButton = Instance.new("TextButton")
-    PurchaseButton.Name = "PurchaseButton"
-    PurchaseButton.Text = "🚀 PURCHASE SELECTED"
-    PurchaseButton.Font = Enum.Font.GothamSemibold
-    PurchaseButton.TextSize = buttonTextSize
-    PurchaseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    PurchaseButton.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
-    PurchaseButton.BorderColor3 = Color3.fromRGB(120, 60, 30)
-    PurchaseButton.BorderSizePixel = 2
-    PurchaseButton.Position = UDim2.new(0, 0, 0.65, 0)
-    PurchaseButton.Size = UDim2.new(1, 0, 0, buttonHeight)
-    PurchaseButton.Parent = QuickBuyContent
-    
-    local PurchaseCorner = Instance.new("UICorner")
-    PurchaseCorner.CornerRadius = UDim.new(0, 6)
-    PurchaseCorner.Parent = PurchaseButton
-    
-    -- Refresh Button
-    local RefreshButton = Instance.new("TextButton")
-    RefreshButton.Name = "RefreshButton"
-    RefreshButton.Text = "🔄 REFRESH GUN LIST"
-    RefreshButton.Font = Enum.Font.GothamSemibold
-    RefreshButton.TextSize = buttonTextSize * 0.9
-    RefreshButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    RefreshButton.BackgroundColor3 = Color3.fromRGB(60, 40, 20)
-    RefreshButton.BorderColor3 = Color3.fromRGB(100, 60, 30)
-    RefreshButton.BorderSizePixel = 2
-    RefreshButton.Position = UDim2.new(0, 0, 0.8, 0)
-    RefreshButton.Size = UDim2.new(1, 0, 0, buttonHeight * 0.8)
-    RefreshButton.Parent = QuickBuyContent
-    
-    local RefreshCorner = Instance.new("UICorner")
-    RefreshCorner.CornerRadius = UDim.new(0, 6)
-    RefreshCorner.Parent = RefreshButton
-    
-    -- Selected gun label
-    local SelectedLabel = Instance.new("TextLabel")
-    SelectedLabel.Name = "SelectedLabel"
-    SelectedLabel.Text = "Selected: None"
-    SelectedLabel.Font = Enum.Font.GothamMedium
-    SelectedLabel.TextSize = buttonTextSize * 0.9
-    SelectedLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
-    SelectedLabel.BackgroundTransparency = 1
-    SelectedLabel.Position = UDim2.new(0, 0, 0.9, 0)
-    SelectedLabel.Size = UDim2.new(1, 0, 0, 30)
-    SelectedLabel.Parent = QuickBuyContent
     
     -- Function to create glowing button for dupe tab
     local function createGlowingButton(name, text, positionY, halfWidth)
@@ -1099,10 +1015,6 @@ local function createMobileFriendlyUI()
     local button1, label1, frame1 = createGlowingButton("Auto", "🔒 AUTO SAFE DUPE", 0, false)
     local button1b, label1b, frame1b = createGlowingButton("Backpack", "🎒 BACKPACK DUPE", 65, false)
     local button1c, label1c, frame1c = createGlowingButton("Trunk", "🚗 TRUNK DUPE", 130, false)
-    local button2, label2, frame2 = createGlowingButton("ResetTarget", "🗑️ RESET TARGET", 195, true)
-    local button3, label3, frame3 = createGlowingButton("Teleport", "📍 TP CLOSEST SAFE", 195, true)
-    local button4, label4, frame4 = createGlowingButton("MaxMoney", "💰 MAX MONEY", 260, false)
-    local button5, label5, frame5 = createGlowingButton("Reset", "🔄 RESET COOLDOWN", 325, false)
     
     -- Position the half-width buttons side by side
     frame2.Position = UDim2.new(0, 0, 0, 195 * deviceInfo.buttonScale)
