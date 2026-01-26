@@ -1143,7 +1143,7 @@ local function createMobileFriendlyUI()
     -- Main Title (Glowing Purple)
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "TitleLabel"
-    TitleLabel.Text = "Chopzz Dupe"
+    TitleLabel.Text = "VALLEY.GG"
     TitleLabel.Font = Enum.Font.GothamBlack
     TitleLabel.TextSize = (isMobile and 22 or 20) * deviceInfo.textScale
     TitleLabel.TextColor3 = Color3.fromRGB(180, 100, 255)
