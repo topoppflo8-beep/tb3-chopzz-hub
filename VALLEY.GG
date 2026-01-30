@@ -1,1767 +1,1575 @@
--- VALLEY.GG Safe Dupe + Quick Buy (Combined)
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
--- Services
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local StarterGui = game:GetService("StarterGui")
-local GuiService = game:GetService("GuiService")
-local MarketplaceService = game:GetService("MarketplaceService")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local executor = identifyexecutor and identifyexecutor() or "Unknown Executor"
 
--- Unanchors before physics (allows full movement), anchors after (anti-detection)
-local function setupNewAntiTP()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local rootPart = character:WaitForChild("HumanoidRootPart")
+local customTheme = {
+    TextColor = Color3.fromRGB(255, 255, 255),
+    Background = Color3.fromRGB(15, 15, 15),
+    Topbar = Color3.fromRGB(15, 15, 15),
+    Shadow = Color3.fromRGB(255, 255, 255),
+    NotificationBackground = Color3.fromRGB(0, 0, 0),
+    NotificationActionsBackground = Color3.fromRGB(35, 0, 70),
+    TabBackground = Color3.fromRGB(15, 15, 15),
+    TabStroke = Color3.fromRGB(15, 15, 15),
+    TabBackgroundSelected = Color3.fromRGB(15, 15, 15),
+    TabTextColor = Color3.fromRGB(149, 149, 149),
+    SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
+    ElementBackground = Color3.fromRGB(15, 15, 15),
+    ElementBackgroundHover = Color3.fromRGB(15, 15, 15),
+    SecondaryElementBackground = Color3.fromRGB(15, 15, 15),
+    ElementStroke = Color3.fromRGB(75, 0, 130),
+    SecondaryElementStroke = Color3.fromRGB(75, 0, 130),
+    SliderBackground = Color3.fromRGB(255, 255, 255),
+    SliderProgress = Color3.fromRGB(75, 0, 130),
+    SliderStroke = Color3.fromRGB(75, 0, 130),
+    ToggleBackground = Color3.fromRGB(15, 15, 15),
+    ToggleEnabled = Color3.fromRGB(75, 0, 130),
+    ToggleDisabled = Color3.fromRGB(255, 255, 255),
+    ToggleEnabledStroke = Color3.fromRGB(75, 0, 130),
+    ToggleDisabledStroke = Color3.fromRGB(15, 15, 15),
+    ToggleEnabledOuterStroke = Color3.fromRGB(255, 255, 255),
+    ToggleDisabledOuterStroke = Color3.fromRGB(255, 255, 255),
+    DropdownSelected = Color3.fromRGB(149, 149, 149),
+    DropdownUnselected = Color3.fromRGB(15, 15, 15),
+    InputBackground = Color3.fromRGB(15, 15, 15),
+    InputStroke = Color3.fromRGB(75, 0, 130),
+}
 
-    RunService.PreSimulation:Connect(function()
-        if rootPart and rootPart.Parent then
-            rootPart.Anchored = false
-        end
-    end)
-
-    RunService.PostSimulation:Connect(function()
-        if rootPart and rootPart.Parent then
-            rootPart.Anchored = true
-        end
-    end)
-
-    -- Reconnect on respawn
-    player.CharacterAdded:Connect(function(newChar)
-        rootPart = newChar:WaitForChild("HumanoidRootPart")
-    end)
-end
-
--- Start the new anti-TP immediately
-task.spawn(setupNewAntiTP)
-
--- Device detection and scaling function
-local function getDeviceInfo()
-    local screenSize = GuiService:GetScreenResolution()
-    local aspectRatio = screenSize.X / screenSize.Y
-    local isTouch = UserInputService.TouchEnabled
-   
-    local deviceType, uiScale, buttonScale, textScale
-   
-    if isTouch then
-        -- Mobile devices
-        if aspectRatio >= 0.55 and aspectRatio <= 0.6 then
-            deviceType = "Phone_Tall" -- iPhone, most phones
-            uiScale = 0.85
-            buttonScale = 1.25
-            textScale = 1.15
-        elseif aspectRatio > 0.6 and aspectRatio <= 0.67 then
-            deviceType = "Phone_Wide" -- Some Android phones
-            uiScale = 0.9
-            buttonScale = 1.2
-            textScale = 1.1
-        elseif aspectRatio > 0.67 and aspectRatio <= 0.75 then
-            deviceType = "Tablet" -- iPads, tablets
-            uiScale = 1.1
-            buttonScale = 1.15
-            textScale = 1.08
-        else
-            deviceType = "Mobile_Other"
-            uiScale = 1.0
-            buttonScale = 1.2
-            textScale = 1.1
-        end
-    else
-        -- Desktop devices
-        local totalPixels = screenSize.X * screenSize.Y
-       
-        if totalPixels >= 3840 * 2160 then -- 4K
-            deviceType = "Desktop_4K"
-            uiScale = 1.4
-            buttonScale = 1.1
-            textScale = 1.2
-        elseif totalPixels >= 2560 * 1440 then -- 2K/QHD
-            deviceType = "Desktop_QHD"
-            uiScale = 1.3
-            buttonScale = 1.05
-            textScale = 1.15
-        elseif totalPixels >= 1920 * 1080 then -- Full HD
-            deviceType = "Desktop_FHD"
-            uiScale = 1.2
-            buttonScale = 1.0
-            textScale = 1.1
-        elseif totalPixels >= 1366 * 768 then -- HD
-            deviceType = "Desktop_HD"
-            uiScale = 1.0
-            buttonScale = 1.0
-            textScale = 1.0
-        else -- Low resolution
-            deviceType = "Desktop_LowRes"
-            uiScale = 0.9
-            buttonScale = 0.95
-            textScale = 0.95
-        end
-    end
-   
-    return {
-        deviceType = deviceType,
-        screenSize = screenSize,
-        aspectRatio = aspectRatio,
-        isTouch = isTouch,
-        uiScale = uiScale,
-        buttonScale = buttonScale,
-        textScale = textScale
+local Window = Rayfield:CreateWindow({
+    Name = "Tuuf's Hub | " .. executor,
+    Icon = nil,
+    LoadingTitle = "",
+    LoadingSubtitle = "",
+    Theme = customTheme,
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+    ConfigurationSaving = {
+        Enabled = false,
+        FolderName = "PurpleThemeHub",
+        FileName = "BigHub"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "",
+        RememberJoins = true
+    },
+    KeySystem = false,
+    KeySettings = {
+        Title = "",
+        Subtitle = "Authentication Required",
+        Note = "Get your key at: https://discord.gg/mudFqDYA",
+        FileName = "jc_hub_key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = { "" },
+        Theme = customTheme
     }
-end
--- Get device info
-local deviceInfo = getDeviceInfo()
-local isMobile = deviceInfo.isTouch
--- Print device info to console
-print("📱 Device Info:")
-print(" Type:", deviceInfo.deviceType)
-print(" Screen:", deviceInfo.screenSize.X, "x", deviceInfo.screenSize.Y)
-print(" Aspect Ratio:", string.format("%.2f:1", deviceInfo.aspectRatio))
-print(" UI Scale:", deviceInfo.uiScale .. "x")
-print(" Button Scale:", deviceInfo.buttonScale .. "x")
-print(" Text Scale:", deviceInfo.textScale .. "x")
--- Remotes
-local InventoryEvent = ReplicatedStorage:FindFirstChild("Inventory")
--- Variables
-local AutoSafeDupeEnabled = false
-local AutoBackpackDupeEnabled = false
-local AutoTrunkDupeEnabled = false
-local AutoSafeDupeThread = nil
-local AutoBackpackDupeThread = nil
-local AutoTrunkDupeThread = nil
-local SafeCooldown = false
-local SafeTargetWeapon = nil
-local glowAnimationEnabled = true
-local uiVisible = true
+})
 
--- Notification helper for F9 menu
-local function F9Notification(text)
-    print("📢 " .. text)
+uis = game:GetService("UserInputService")
+TweenService = game:GetService("TweenService")
+
+existingGui = game.CoreGui:FindFirstChild("CustomScreenGui")
+if existingGui then
+    existingGui:Destroy()
 end
--- Function to reset all cooldowns
-local function resetAllCooldowns()
-    SafeCooldown = false
-    if AutoSafeDupeThread then
-        task.cancel(AutoSafeDupeThread)
-        AutoSafeDupeThread = nil
-    end
-    if AutoBackpackDupeThread then
-        task.cancel(AutoBackpackDupeThread)
-        AutoBackpackDupeThread = nil
-    end
-    if AutoTrunkDupeThread then
-        task.cancel(AutoTrunkDupeThread)
-        AutoTrunkDupeThread = nil
-    end
-    AutoSafeDupeEnabled = false
-    AutoBackpackDupeEnabled = false
-    AutoTrunkDupeEnabled = false
-    F9Notification("All cooldowns reset!")
+
+ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CustomScreenGui"
+Frame = Instance.new("Frame")
+TextButton = Instance.new("TextButton")
+
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(1, -120, 0, 30)
+Frame.Size = UDim2.new(0, 60, 0, 60)
+
+imageLabel = Instance.new("ImageLabel")
+imageLabel.Parent = Frame
+imageLabel.Size = UDim2.new(1, 0, 1, 0)
+imageLabel.Position = UDim2.new(0, 0, 0, 0)
+imageLabel.BackgroundTransparency = 1
+
+TextButton.Parent = imageLabel
+TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.BackgroundTransparency = 1.000
+TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.BorderSizePixel = 0
+TextButton.Size = UDim2.new(1, 0, 1, 0)
+TextButton.Font = Enum.Font.SourceSans
+TextButton.Text = ""
+TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.TextSize = 27
+
+function createTextShadow(button)
+    shadowOffset = 2
+    shadowLabel = Instance.new("TextLabel", Frame)
+    shadowLabel.Size = button.Size
+    shadowLabel.Position = button.Position + UDim2.new(0, shadowOffset, 0, shadowOffset)
+    shadowLabel.Text = button.Text
+    shadowLabel.TextScaled = button.TextScaled
+    shadowLabel.Font = button.Font
+    shadowLabel.BackgroundTransparency = 1
+    shadowLabel.TextSize = button.TextSize
+    shadowLabel.TextTransparency = 0.5
 end
--- Function to count weapon copies
-local function countWeaponCopies(weaponName)
-    local count = 0
-   
-    if player.Character then
-        if player.Character:FindFirstChild(weaponName) then
-            count = count + 1
-        end
-    end
-   
-    if player.Backpack then
-        for _, item in pairs(player.Backpack:GetChildren()) do
-            if item.Name == weaponName then
-                count = count + 1
-            end
-        end
-    end
-   
-    return count
+
+createTextShadow(TextButton)
+
+glowStroke = Instance.new("UIStroke", Frame)
+glowStroke.Thickness = 3
+glowStroke.Transparency = 0.8
+glowStroke.Color = Color3.fromRGB(75, 0, 130)
+
+gradient = Instance.new("UIGradient", glowStroke)
+gradient.Color = ColorSequence.new {
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(75, 0, 130)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 128)) -- lighter purple highlight
+}
+gradient.Rotation = 45
+
+tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+tweenShowFrame = TweenService:Create(Frame, tweenInfo, { Position = UDim2.new(0.5, 0, 0.3, 0) })
+
+function createGlowEffect(stroke)
+    glowTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+    tween = TweenService:Create(stroke, glowTweenInfo, { Transparency = 0.1, Thickness = 5 })
+    tween:Play()
 end
--- Find weapon to dupe for safe
-local function findWeaponToDupeForSafe()
-    local Character = player.Character
-    if not Character then return nil end
-    if SafeTargetWeapon then
-        local targetTool = Character:FindFirstChild(SafeTargetWeapon)
-        if targetTool then return targetTool end
-        local Backpack = player.Backpack
-        if Backpack then
-            local targetInBackpack = Backpack:FindFirstChild(SafeTargetWeapon)
-            if targetInBackpack then
-                local Humanoid = Character:FindFirstChild("Humanoid")
-                if Humanoid then
-                    Humanoid:EquipTool(targetInBackpack)
-                    task.wait(0.2)
-                    return Character:FindFirstChild(SafeTargetWeapon)
+
+createGlowEffect(glowStroke)
+
+TextButton.MouseButton1Click:Connect(function()
+    Rayfield:SetVisibility(not Rayfield:IsVisible())
+end)
+
+function makeDraggable(frame)
+    dragging = nil
+    dragStart = nil
+    startPos = nil
+    lastInputChangedConnection = nil
+
+    function beginDrag(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+
+            if lastInputChangedConnection then
+                lastInputChangedConnection:Disconnect()
+            end
+
+            lastInputChangedConnection = uis.InputChanged:Connect(function(newInput)
+                if newInput.UserInputType == Enum.UserInputType.MouseMovement or newInput.UserInputType == Enum.UserInputType.Touch then
+                    delta = newInput.Position - dragStart
+                    frame.Position = UDim2.new(
+                        startPos.X.Scale, startPos.X.Offset + delta.X,
+                        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                    )
                 end
-            end
-        end
-    end
-    return Character:FindFirstChildOfClass("Tool")
-end
--- ORIGINAL: Store weapons in closest safe (when you have exactly 2 copies)
-local function autoSafeWeapons()
-    if InventoryEvent and SafeTargetWeapon then
-        local weaponCount = countWeaponCopies(SafeTargetWeapon)
-       
-        if weaponCount == 2 then
-            local character = player.Character
-            if not character or not character:FindFirstChild("HumanoidRootPart") then
-                return false, "Character not ready"
-            end
-           
-            local playerPosition = character.HumanoidRootPart.Position
-            local closestSafe = nil
-            local shortestDistance = math.huge
-            local maxDistance = 50 -- Maximum distance to consider a safe
-           
-            -- Find all safes within the map
-            local map = workspace["1# Map"]
-            if not map then
-                return false, "Map not found"
-            end
-           
-            -- Look for models that are likely safes by name or characteristics
-            local allSafes = {}
-           
-            -- Search for models with safe-like names
-            for _, model in pairs(map:GetDescendants()) do
-                if model:IsA("Model") then
-                    -- Check if model name indicates it's a safe
-                    local modelName = string.lower(model.Name)
-                    if modelName:find("safe") or modelName:find("gunstorage") or modelName:find("weaponstorage") then
-                        -- Find the main part of the safe (usually largest part or named "Part")
-                        local mainPart = nil
-                        local largestSize = 0
-                       
-                        for _, part in pairs(model:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                -- Check if this looks like a safe door/main part
-                                local partSize = part.Size.X * part.Size.Y * part.Size.Z
-                               
-                                -- Prioritize parts named "Part" or parts that are metal
-                                if part.Name == "Part" or part.Material == Enum.Material.Metal then
-                                    if partSize > largestSize then
-                                        largestSize = partSize
-                                        mainPart = part
-                                    end
-                                end
-                               
-                                -- If we haven't found a main part yet, use any base part
-                                if not mainPart then
-                                    mainPart = part
-                                end
-                            end
-                        end
-                       
-                        if mainPart then
-                            table.insert(allSafes, {model = model, part = mainPart})
-                        end
-                    end
-                end
-            end
-           
-            -- If no safes found by name, look for models with specific characteristics
-            if #allSafes == 0 then
-                for _, model in pairs(map:GetDescendants()) do
-                    if model:IsA("Model") then
-                        -- Look for models that might be safes based on their parts
-                        local hasMetalPart = false
-                        local hasLockIndicator = false
-                        local mainPart = nil
-                       
-                        for _, part in pairs(model:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                -- Check for metal parts (common in safes)
-                                if part.Material == Enum.Material.Metal then
-                                    hasMetalPart = true
-                                    if not mainPart or part.Name == "Part" then
-                                        mainPart = part
-                                    end
-                                end
-                               
-                                -- Check for parts that might indicate a lock or safe
-                                if part.Name:find("Lock") or part.Name:find("Door") or part.Name:find("Handle") then
-                                    hasLockIndicator = true
-                                end
-                               
-                                -- If no metal part yet, use any part
-                                if not mainPart then
-                                    mainPart = part
-                                end
-                            end
-                        end
-                       
-                        -- If it has metal parts or lock indicators, it might be a safe
-                        if mainPart and (hasMetalPart or hasLockIndicator) then
-                            table.insert(allSafes, {model = model, part = mainPart})
-                        end
-                    end
-                end
-            end
-           
-            -- Find the closest safe
-            for _, safeData in pairs(allSafes) do
-                local distance = (playerPosition - safeData.part.Position).Magnitude
-                if distance < shortestDistance and distance <= maxDistance then
-                    shortestDistance = distance
-                    closestSafe = safeData.model -- Store the model, not the part
-                end
-            end
-           
-            if closestSafe then
-                InventoryEvent:FireServer("Change", SafeTargetWeapon, "Backpack", closestSafe)
-                return true, "Stored " .. SafeTargetWeapon .. " in closest safe (" .. math.floor(shortestDistance) .. " studs away)"
-            else
-                -- Fallback to original specific safe if no close safe found
-                local containers = map:GetChildren()
-                if #containers >= 968 then
-                    local container = containers[968]
-                    if container then
-                        local containerChildren = container:GetChildren()
-                        if #containerChildren >= 5 then
-                            local targetChild = containerChildren[5]
-                            if targetChild then
-                                InventoryEvent:FireServer("Change", SafeTargetWeapon, "Backpack", targetChild)
-                                return true, "Stored " .. SafeTargetWeapon .. " in default safe (no close safe found)"
-                            end
-                        end
-                    end
-                end
-                return false, "No safe found within " .. maxDistance .. " studs"
-            end
-        else
-            return false, "Not storing " .. SafeTargetWeapon .. " (Have " .. weaponCount .. " copies, need exactly 2)"
-        end
-    end
-    return false, "Safe remote not found"
-end
--- NEW: Store weapons in backpack (when you have exactly 2 copies)
-local function autoStoreWeaponsToBackpack()
-    if InventoryEvent and SafeTargetWeapon then
-        local weaponCount = countWeaponCopies(SafeTargetWeapon)
-       
-        if weaponCount == 2 then
-            local success = pcall(function()
-                ReplicatedStorage.BACKPACK_REMOTE:FireServer("Store", SafeTargetWeapon)
             end)
-            
-            if success then
-                return true, "Stored " .. SafeTargetWeapon .. " in backpack (exactly 2 copies)"
-            else
-                return false, "Failed to store " .. SafeTargetWeapon .. " in backpack"
-            end
-        else
-            return false, "Not storing " .. SafeTargetWeapon .. " (Have " .. weaponCount .. " copies, need exactly 2)"
         end
     end
-    return false, "Inventory remote not found"
-end
--- NEW: Store weapons in car trunk (when you have exactly 2 copies) - FIXED WITH CORRECT REMOTE
-local function autoStoreWeaponsToTrunk()
-    if SafeTargetWeapon then
-        local weaponCount = countWeaponCopies(SafeTargetWeapon)
-       
-        if weaponCount == 2 then
-            local Event = ReplicatedStorage:FindFirstChild("TrunkStorage")
-            if not Event then
-                return false, "TrunkStorage remote not found"
+
+    function endDrag(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+            if lastInputChangedConnection then
+                lastInputChangedConnection:Disconnect()
+                lastInputChangedConnection = nil
             end
-            
-            local success, err = pcall(function()
-                Event:FireServer("Store", SafeTargetWeapon)
-            end)
-            
-            if success then
-                return true, "Stored " .. SafeTargetWeapon .. " in car trunk"
-            else
-                return false, "Failed to store " .. SafeTargetWeapon .. " in trunk: " .. tostring(err)
-            end
-        else
-            return false, "Not storing " .. SafeTargetWeapon .. " in trunk (Have " .. weaponCount .. " copies, need exactly 2)"
         end
     end
-    return false, "No target weapon set"
-end
--- Main safe dupe function (used by both)
-local function performSafeDupe()
-    if SafeCooldown then
-        F9Notification("Cooldown active!")
-        return false, "Cooldown active"
+
+    frame.InputBegan:Connect(beginDrag)
+    frame.InputEnded:Connect(endDrag)
+
+    for _, child in ipairs(frame:GetDescendants()) do
+        if child:IsA("GuiObject") then
+            child.InputBegan:Connect(beginDrag)
+            child.InputEnded:Connect(endDrag)
+        end
     end
-    local Character = player.Character
-    if not Character then
-        return false, "Character not found"
-    end
-    local Tool = findWeaponToDupeForSafe()
-    if not Tool then
-        return false, "No weapon found! Hold a weapon"
-    end
-    if not SafeTargetWeapon then
-        SafeTargetWeapon = Tool.Name
-        F9Notification("Target set: " .. SafeTargetWeapon)
-    end
-    local Humanoid = Character:FindFirstChild("Humanoid")
-    if Humanoid then
-        Humanoid:UnequipTools()
-        task.wait(0.2)
-    end
-    local ToolName = Tool.Name
-    local ToolId = nil
-    local Connection
-    Connection = ReplicatedStorage.MarketItems.ChildAdded:Connect(function(item)
-        if item.Name == ToolName then
-            if item:WaitForChild("owner").Value == player.Name then
-                ToolId = item:GetAttribute("SpecialId")
+
+    uis.InputEnded:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+            dragging = false
+            if lastInputChangedConnection then
+                lastInputChangedConnection:Disconnect()
+                lastInputChangedConnection = nil
             end
         end
     end)
-    SafeCooldown = true
-    ReplicatedStorage.ListWeaponRemote:FireServer(ToolName, 1000000)
-    task.wait(0.26)
-    ReplicatedStorage.BackpackRemote:InvokeServer("Store", ToolName)
-    task.wait(3)
-    if ToolId then
-        ReplicatedStorage.BuyItemRemote:FireServer(ToolName, "Remove", ToolId)
-    else
-        pcall(function()
-            ReplicatedStorage.BuyItemRemote:FireServer(ToolName, "Remove")
-        end)
-    end
-    ReplicatedStorage.BackpackRemote:InvokeServer("Grab", ToolName)
-    if Connection then
-        Connection:Disconnect()
-    end
-    task.wait(1)
-    local Backpack = player.Backpack
-    if Backpack then
-        local toolInBackpack = Backpack:FindFirstChild(ToolName)
-        if toolInBackpack and Humanoid then
-            Humanoid:EquipTool(toolInBackpack)
-        end
-    end
-    SafeCooldown = false
-    return true, "Safe dupe completed: " .. ToolName
-end
--- Auto grab weapons for safe
-local function autoGrabWeaponsForSafe()
-    local Character = player.Character
-    if not Character then return end
-   
-    local Humanoid = Character:FindFirstChild("Humanoid")
-    local Backpack = player.Backpack
-   
-    if Humanoid and Backpack then
-        Humanoid:UnequipTools()
-        task.wait(0.2)
-       
-        if SafeTargetWeapon then
-            local targetTool = Backpack:FindFirstChild(SafeTargetWeapon)
-            if targetTool then
-                Humanoid:EquipTool(targetTool)
-                task.wait(0.2)
-            end
-        end
-    end
-end
--- Start auto safe dupe (ORIGINAL - stores to safe)
-local function startAutoSafeDupeMacro()
-    if AutoSafeDupeEnabled then
-        stopAutoSafeDupeMacro()
-        return
-    end
-   
-    AutoSafeDupeEnabled = true
-    F9Notification("🔒 Auto Safe Dupe STARTED!")
-    AutoSafeDupeThread = task.spawn(function()
-        while AutoSafeDupeEnabled do
-            local success, message = performSafeDupe()
-           
-            if success then
-                F9Notification(message)
-                task.wait(1)
-               
-                -- Grab weapons after dupe
-                autoGrabWeaponsForSafe()
-               
-                -- Check and store in closest safe if exactly 2 copies
-                local safeSuccess, safeMsg = autoSafeWeapons()
-                if safeSuccess then
-                    F9Notification(safeMsg)
-                else
-                    F9Notification(safeMsg)
-                end
-            else
-                F9Notification(message)
-            end
-           
-            if AutoSafeDupeEnabled then
-                task.wait(5)
-            end
-        end
-    end)
-end
--- Stop auto safe dupe
-local function stopAutoSafeDupeMacro()
-    AutoSafeDupeEnabled = false
-    if AutoSafeDupeThread then
-        task.cancel(AutoSafeDupeThread)
-        AutoSafeDupeThread = nil
-    end
-    F9Notification("🛑 Auto Safe Dupe STOPPED!")
-end
--- Start auto backpack dupe (NEW - stores to backpack)
-local function startAutoBackpackDupeMacro()
-    if AutoBackpackDupeEnabled then
-        stopAutoBackpackDupeMacro()
-        return
-    end
-   
-    AutoBackpackDupeEnabled = true
-    F9Notification("🎒 Auto Backpack Dupe STARTED!")
-    AutoBackpackDupeThread = task.spawn(function()
-        while AutoBackpackDupeEnabled do
-            local success, message = performSafeDupe()
-           
-            if success then
-                F9Notification(message)
-                task.wait(1)
-               
-                -- Grab weapons after dupe
-                autoGrabWeaponsForSafe()
-               
-                -- Check and store in backpack if exactly 2 copies
-                local storeSuccess, storeMsg = autoStoreWeaponsToBackpack()
-                if storeSuccess then
-                    F9Notification(storeMsg)
-                else
-                    F9Notification(storeMsg)
-                end
-            else
-                F9Notification(message)
-            end
-           
-            if AutoBackpackDupeEnabled then
-                task.wait(5)
-            end
-        end
-    end)
-end
--- Stop auto backpack dupe
-local function stopAutoBackpackDupeMacro()
-    AutoBackpackDupeEnabled = false
-    if AutoBackpackDupeThread then
-        task.cancel(AutoBackpackDupeThread)
-        AutoBackpackDupeThread = nil
-    end
-    F9Notification("🛑 Auto Backpack Dupe STOPPED!")
-end
--- Start auto trunk dupe (NEW - stores to car trunk) - FIXED TIMING TO MATCH OTHERS
-local function startAutoTrunkDupeMacro()
-    if AutoTrunkDupeEnabled then
-        stopAutoTrunkDupeMacro()
-        return
-    end
-   
-    AutoTrunkDupeEnabled = true
-    F9Notification("🚗 Auto Trunk Dupe STARTED!")
-    AutoTrunkDupeThread = task.spawn(function()
-        while AutoTrunkDupeEnabled do
-            local success, message = performSafeDupe()
-           
-            if success then
-                F9Notification(message)
-                task.wait(1) -- SAME AS SAFE/BACKPACK DUPES
-               
-                -- Grab weapons after dupe
-                autoGrabWeaponsForSafe()
-               
-                -- Check and store in car trunk if exactly 2 copies
-                local trunkSuccess, trunkMsg = autoStoreWeaponsToTrunk()
-                if trunkSuccess then
-                    F9Notification(trunkMsg)
-                else
-                    F9Notification(trunkMsg)
-                end
-            else
-                F9Notification(message)
-            end
-           
-            if AutoTrunkDupeEnabled then
-                task.wait(5) -- SAME AS SAFE/BACKPACK DUPES
-            end
-        end
-    end)
-end
--- Stop auto trunk dupe
-local function stopAutoTrunkDupeMacro()
-    AutoTrunkDupeEnabled = false
-    if AutoTrunkDupeThread then
-        task.cancel(AutoTrunkDupeThread)
-        AutoTrunkDupeThread = nil
-    end
-    F9Notification("🛑 Auto Trunk Dupe STOPPED!")
-end
--- Reset target weapon
-local function resetTargetWeapon()
-    if SafeTargetWeapon then
-        local previousWeapon = SafeTargetWeapon
-        SafeTargetWeapon = nil
-        F9Notification("Target reset: " .. previousWeapon)
-    else
-        F9Notification("No target to reset")
-    end
-end
--- Teleport to closest safe (on top of it) - SILENT VERSION
-local function teleportToClosestSafe()
-    local Character = player.Character
-    if not Character then
-        return
-    end
-   
-    local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not HumanoidRootPart then
-        return
-    end
-   
-    local playerPosition = HumanoidRootPart.Position
-    local closestSafe = nil
-    local closestSafePart = nil
-    local shortestDistance = math.huge
-   
-    -- Find all safes in the map
-    local map = workspace["1# Map"]
-    if not map then
-        return
-    end
-   
-    -- Look for models that are definitely safes by name
-    for _, model in pairs(map:GetDescendants()) do
-        if model:IsA("Model") then
-            local modelName = string.lower(model.Name)
-           
-            -- Only look for objects with "safe" in the name to avoid teleporting to random objects
-            if modelName:find("safe") or modelName:find("gunstorage") or modelName:find("weaponstorage") then
-                -- Find the main/largest part of the safe
-                local mainPart = nil
-                local largestSize = 0
-               
-                for _, part in pairs(model:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        local partSize = part.Size.X * part.Size.Y * part.Size.Z
-                       
-                        -- Prioritize parts named "Part" (common for safes)
-                        if part.Name == "Part" then
-                            if partSize > largestSize then
-                                largestSize = partSize
-                                mainPart = part
-                            end
-                        end
-                       
-                        -- If no "Part" found, use largest metal part
-                        if not mainPart and part.Material == Enum.Material.Metal then
-                            if partSize > largestSize then
-                                largestSize = partSize
-                                mainPart = part
-                            end
-                        end
-                       
-                        -- If still no main part, use largest part
-                        if not mainPart then
-                            if partSize > largestSize then
-                                largestSize = partSize
-                                mainPart = part
-                            end
-                        end
-                    end
-                end
-               
-                if mainPart then
-                    local distance = (playerPosition - mainPart.Position).Magnitude
-                    if distance < shortestDistance then
-                        shortestDistance = distance
-                        closestSafe = model
-                        closestSafePart = mainPart
-                    end
-                end
-            end
-        end
-    end
-   
-    if closestSafePart then
-        -- Calculate position on top of the safe
-        local safeHeight = closestSafePart.Size.Y
-        local teleportHeight = safeHeight + 3 -- 3 studs above the safe
-       
-        -- Get the top center of the safe
-        local teleportPosition = closestSafePart.Position + Vector3.new(0, teleportHeight, 0)
-       
-        -- Create a CFrame that's upright (no rotation)
-        local teleportCFrame = CFrame.new(teleportPosition)
-       
-        -- Teleport to the top of the safe
-        HumanoidRootPart.CFrame = teleportCFrame
-    else
-        -- Fallback to original coordinates
-        local safeCFrame = CFrame.new(-185.01, 295.40, -994.84)
-        HumanoidRootPart.CFrame = safeCFrame
-    end
-end
--- Fire proximity prompt function
-local function _fireproximityprompt(prompt)
-    fireproximityprompt(prompt)
-end
--- Simple teleport function for MAX MONEY - SILENT VERSION
-local function Teleport(cframe, instant)
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        if instant then
-            player.Character.HumanoidRootPart.CFrame = cframe
-        else
-            player.Character.HumanoidRootPart.CFrame = cframe
-        end
-    end
 end
 
--- ========== QUICK BUY SECTION ==========
--- Get gun list from workspace
-local function getGunList()
-    local guns = {}
-    if Workspace:FindFirstChild("GUNS") then
-        for _, gunModel in pairs(Workspace.GUNS:GetChildren()) do
-            if gunModel:IsA("Model") then
-                local price = gunModel:FindFirstChild("Price", true)
-                if price then
-                    table.insert(guns, gunModel.Name)
-                end
-            end
-        end
-    end
-    table.sort(guns)
-    return guns
+makeDraggable(Frame)
+
+
+
+local MainTab = Window:CreateTab("Main", nil)
+MainTab:CreateSection("Inf money")
+
+local Paragraph = MainTab:CreateParagraph({
+    Title = "Instructions",
+    Content =
+    "Using infinite money is easy â just make an Ice-Fruit Cup, then click the 'Inf Money' button to instantly max out your dirty money."
+})
+
+local Button = MainTab:CreateButton({
+   Name = "💸 TP TO GET MAX",
+   Callback = function()
+       local player = game.Players.LocalPlayer
+       local StarterGui = game:GetService("StarterGui")
+       local camera = game.Workspace.CurrentCamera
+       local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+       local originalCameraType = camera.CameraType
+       local originalFieldOfView = camera.FieldOfView
+       local originalCameraShake = camera:FindFirstChild("CameraShake")
+       local cameraShakeBackup = originalCameraShake and originalCameraShake.Value or nil
+
+       local function GetCharacter()
+           return player and player.Character
+       end
+
+       getgenv().SwimMethod = false
+
+       local function enableSwimMethod()
+           getgenv().SwimMethod = true
+           task.wait(1)
+       end
+
+       local function disableSwimMethod()
+           getgenv().SwimMethod = false
+       end
+
+       local function SwimBypassTeleport(destinationCFrame)
+           local character = GetCharacter()
+           if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+           local HRP = character.HumanoidRootPart
+
+           enableSwimMethod()
+           task.wait(0.25)
+
+           HRP.CFrame = destinationCFrame + Vector3.new(2, 0, 0)
+
+           task.delay(0.25, function()
+               disableSwimMethod()
+           end)
+       end
+
+       local tool = player.Backpack:FindFirstChild("Ice-Fruit Cupz")
+       if tool then
+           player.Character.Humanoid:EquipTool(tool)
+       else
+           Rayfield:Notify({
+               Title = "No Ice-Fruit Cupz",
+               Content = "❌ Tool 'Ice-Fruit Cupz' not found in backpack",
+               Duration = 3,
+               Image = 4483362458
+           })
+           return
+       end
+
+       local blackScreen = Instance.new("ScreenGui")
+       blackScreen.IgnoreGuiInset = true
+       blackScreen.Parent = game:GetService("CoreGui")
+
+       local frame = Instance.new("Frame", blackScreen)
+       frame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+       frame.Size = UDim2.new(1, 0, 1, 0)
+       frame.Position = UDim2.new(0, 0, 0, 0)
+       frame.BorderSizePixel = 0
+       frame.Visible = true
+
+       local imageLabel = Instance.new("ImageLabel", frame)
+       imageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)          -- 80% width and height of the frame
+       imageLabel.Position = UDim2.new(0.1, 0, 0.1, 0)      -- center it with 10% margin from top-left
+       imageLabel.BackgroundTransparency = 1
+       imageLabel.Image = "rbxassetid://"
+       imageLabel.ScaleType = Enum.ScaleType.Fit
+
+       if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+       local originalCFrame = player.Character.HumanoidRootPart.CFrame
+
+       task.wait(0.5)
+
+       local targetCFrame = CFrame.new(-50.273170471191406, 287.0636291503906, -320.34747314453125)
+       SwimBypassTeleport(targetCFrame)
+
+       task.wait(0.5)
+
+       local cameraOffset = Vector3.new(0, 5, 5)
+       local angleOffset = Vector3.new(0, -1, 0)
+
+       camera.CameraType = Enum.CameraType.Scriptable
+
+       getgenv().cameraFollowConnection = game:GetService("RunService").Heartbeat:Connect(function()
+           if humanoidRootPart then
+               local characterPos = humanoidRootPart.Position
+               camera.CFrame = CFrame.new(characterPos + cameraOffset + angleOffset, characterPos + Vector3.new(0, 3, 0))
+           end
+       end)
+
+       getgenv().instantPrompts = true
+
+       -- ✅ FIX: correct prompt reference
+       local iceFruitSellPrompt = workspace:WaitForChild("IceFruit Sell"):WaitForChild("ProximityPrompt")
+       if iceFruitSellPrompt then
+           iceFruitSellPrompt.HoldDuration = 0
+           iceFruitSellPrompt.MaxActivationDistance = 6
+
+           getgenv().updateConnection = game:GetService("RunService").Heartbeat:Connect(function()
+               if getgenv().instantPrompts and iceFruitSellPrompt.Enabled then
+                   for _ = 1, 70 do
+                       iceFruitSellPrompt:InputHoldBegin()
+                       iceFruitSellPrompt:InputHoldEnd()
+                   end
+               end
+           end)
+       end
+
+       task.spawn(function()
+           task.wait(1)
+
+           getgenv().instantPrompts = false
+
+           if getgenv().updateConnection then
+               getgenv().updateConnection:Disconnect()
+               getgenv().updateConnection = nil
+           end
+
+           if iceFruitSellPrompt then
+               iceFruitSellPrompt.HoldDuration = 1
+               iceFruitSellPrompt.MaxActivationDistance = 4
+           end
+
+           enableSwimMethod()
+           task.wait(0.5)
+           SwimBypassTeleport(originalCFrame)
+           task.wait(0.5)
+           disableSwimMethod()
+
+           if getgenv().cameraFollowConnection then
+               getgenv().cameraFollowConnection:Disconnect()
+               getgenv().cameraFollowConnection = nil
+           end
+
+           camera.CameraType = originalCameraType
+           camera.FieldOfView = originalFieldOfView
+
+           if originalCameraShake then
+               originalCameraShake.Value = cameraShakeBackup
+           end
+
+           blackScreen:Destroy()
+
+           Rayfield:Notify({
+               Title = "Money vulnerability",
+               Content = "Done Generating money",
+               Duration = 2,
+               Image = 4483362458
+           })
+       end)
+   end
+})
+
+
+local SharedStorage = game.ReplicatedStorage
+
+local function InvokeServer(Remote, ...)
+    return Remote:InvokeServer(...)
 end
 
--- Purchase gun function
-local function purchaseGun(gunName)
-    if not Workspace:FindFirstChild("GUNS") or not Workspace.GUNS:FindFirstChild(gunName) then
-        print("❌ Gun not found:", gunName)
-        return false
-    end
-    
-    local gunModel = Workspace.GUNS[gunName]
-    local prompt = gunModel:FindFirstChildWhichIsA("ProximityPrompt", true)
-    local price = gunModel:FindFirstChild("Price", true)
-    
-    if not prompt or not price then
-        print("❌ No prompt or price found")
-        return false
-    end
-    
-    -- Check gamepass
-    local gamepassId = gunModel:FindFirstChild("GamepassID", true)
-    if gamepassId and not MarketplaceService:UserOwnsGamePassAsync(player.UserId, gamepassId.Value) then
-        print("❌ Don't own gamepass for:", gunName)
-        return false
-    end
-    
-    -- Check money
-    if player:FindFirstChild("stored") and player.stored:FindFirstChild("Money") then
-        if player.stored.Money.Value < price.Value then
-            local shortAmount = price.Value - player.stored.Money.Value
-            print("❌ Need $" .. shortAmount .. " more for " .. gunName)
+local function FindItem(Item)
+    return game.Players.LocalPlayer.Backpack:FindFirstChild(Item) or
+    game.Players.LocalPlayer.Character:FindFirstChild(Item)
+end
+
+local function AutoBuySupplies()
+    local Items = {
+        "Ice-Fruit Bag",
+        "Ice-Fruit Cupz",
+        "FijiWater",
+        "FreshWater",
+    }
+
+    for _, item in ipairs(Items) do
+        local ItemStock = SharedStorage.ExoticStock:FindFirstChild(item)
+        if not ItemStock or ItemStock.Value == 0 then
+            warn("Item out of stock:", item)
             return false
         end
     end
-    
-    local oldCFrame = player.Character and player.Character.HumanoidRootPart and player.Character.HumanoidRootPart.CFrame
-    
-    if not oldCFrame then
-        print("❌ Character not ready")
-        return false
+
+    for _, item in ipairs(Items) do
+        InvokeServer(SharedStorage.ExoticShopRemote, item)
+        task.wait(1.25)
     end
-    
-    -- Teleport to gun
-    local part = prompt.Parent
-    local teleportCFrame
-    if part:IsA("BasePart") then
-        teleportCFrame = part.CFrame
-    elseif part:IsA("Model") and part.PrimaryPart then
-        teleportCFrame = part.PrimaryPart.CFrame
-    else
-        teleportCFrame = part:GetPivot()
-    end
-    
-    Teleport(teleportCFrame)
-    task.wait(0.4)
-    
-    -- Purchase gun
-    local itemReceived = false
-    local connection
-    
-    connection = player.Backpack.ChildAdded:Connect(function(child)
-        if child.Name == gunName then
-            itemReceived = true
-            if connection then
-                connection:Disconnect()
-            end
+
+    for _, item in ipairs(Items) do
+        if not FindItem(item) then
+            warn("Failed to acquire:", item)
+            return false
         end
-    end)
-    
-    -- Timeout after 1.5 seconds
-    task.delay(1.5, function()
-        if connection then
-            connection:Disconnect()
-        end
-        itemReceived = true
-    end)
-    
-    -- Fire prompt until item received
-    while not itemReceived do
-        fireproximityprompt(prompt)
-        task.wait(0.1)
     end
-    
-    task.wait(0.4)
-    
-    -- Return to original position
-    Teleport(oldCFrame)
-    
-    print("✅ Purchased:", gunName)
+
     return true
 end
 
--- MAX MONEY Function (replaces manual stop)
-local function maxMoneyFunction()
-    F9Notification("Starting MAX MONEY script...")
-   
-    -- Check if player has Ice-Fruit Cupz
-    local function GetFruitCup()
-        local Found, Cup = false, nil
-       
-        -- Check in backpack
-        for _, item in player.Backpack:GetChildren() do
-            if item:IsA("Tool") and item.Name == "Ice-Fruit Cupz" then
-                if item:FindFirstChild("IceFruit Cup") and item["IceFruit Cup"]:FindFirstChild("IceFruit PunchMedium") then
-                    if item["IceFruit Cup"]["IceFruit PunchMedium"].Transparency ~= 1 then
-                        Found = true
-                        Cup = item
-                        break
-                    end
+MainTab:CreateButton({
+    Name = "Buy Ice-Fruitz-Itemz",
+    Callback = function()
+        local success = AutoBuySupplies()
+        if success then
+            Rayfield:Notify({
+                Title = "AutoBuy",
+                Content = "Items purchased successfully!",
+                Duration = 5,
+                Image = 4483362458,
+            })
+        else
+            Rayfield:Notify({
+                Title = "AutoBuy",
+                Content = "Failed to purchase items!",
+                Duration = 5,
+                Image = 4483362458,
+            })
+        end
+    end,
+})
+
+
+MainTab:CreateSection("Market Dupe")
+
+local Paragraph = MainTab:CreateParagraph({
+    Title = "Instructions",
+    Content =
+    "To use Market Dupe, equip the gun you want to duplicate and press the button. Addtionally avoid having more than two of the same item in your inventory, or the duplication will fail."
+})
+
+MainTab:CreateButton({
+    Name = "Duplicate Gun",
+    Callback = function()
+        local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+        local Players = cloneref(game:GetService("Players"))
+
+        local Player = Players.LocalPlayer
+        local Character = Player.Character or Player.CharacterAdded:Wait()
+        local Backpack = Player:WaitForChild("Backpack")
+
+        local Tool = Character:FindFirstChildOfClass("Tool")
+        if not Tool then return end
+
+        Tool.Parent = Backpack
+        task.wait(0.5)
+
+        local ToolName = Tool.Name
+        local ToolId = nil
+
+
+        local function getPing()
+            if typeof(Player.GetNetworkPing) == "function" then
+                local success, result = pcall(function()
+                    return tonumber(string.match(Player:GetNetworkPing(), "%d+"))
+                end)
+                if success and result then
+                    return result
                 end
             end
-        end
-       
-        -- Check in character
-        if not Found and player.Character then
-            for _, item in player.Character:GetChildren() do
-                if item:IsA("Tool") and item.Name == "Ice-Fruit Cupz" then
-                    if item:FindFirstChild("IceFruit Cup") and item["IceFruit Cup"]:FindFirstChild("IceFruit PunchMedium") then
-                        if item["IceFruit Cup"]["IceFruit PunchMedium"].Transparency ~= 1 then
-                            Found = true
-                            Cup = item
-                            break
-                        end
-                    end
+
+            local success2, pingStat = pcall(function()
+                return Players.LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("Ping") or
+                    Players.LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("Ping")
+            end)
+            if success2 and pingStat and pingStat:IsA("TextLabel") then
+                local num = tonumber(string.match(pingStat.Text, "%d+"))
+                if num then
+                    return num
                 end
             end
+
+            local t0 = tick()
+            local temp = Instance.new("BoolValue", ReplicatedStorage)
+            temp.Name = "PingTest_" .. tostring(math.random(10000, 99999))
+            task.wait(0.1)
+            local t1 = tick()
+            temp:Destroy()
+
+            return math.clamp((t1 - t0) * 1000, 50, 300)
         end
-       
-        return Found, Cup
-    end
-   
-    local Found, Cup = GetFruitCup()
-   
-    if Cup and Found then
-        F9Notification("Selling existing fruit cup...")
-       
-        local OLDCFrame = player.Character.HumanoidRootPart.CFrame
-       
-        if Cup.Parent == player.Backpack then
-            player.Character.Humanoid:EquipTool(Cup)
-            task.wait(1)
-        end
-       
-        Teleport(Workspace["IceFruit Sell"].CFrame, true)
-        task.wait(.5)
-       
-        for i = 1, 4000 do
+
+
+        local ping = getPing()
+        local delay = 0.25 + ((math.clamp(ping, 0, 300) / 300) * 0.03)
+
+
+        local marketconnection = ReplicatedStorage.MarketItems.ChildAdded:Connect(function(item)
+            if item.Name == ToolName then
+                local owner = item:WaitForChild("owner", 2)
+                if owner and owner.Value == Player.Name then
+                    ToolId = item:GetAttribute("SpecialId")
+                end
+            end
+        end)
+
+
+        task.spawn(function()
+            ReplicatedStorage.ListWeaponRemote:FireServer(ToolName, 99999)
+        end)
+
+
+        task.wait(delay)
+
+
+        task.spawn(function()
+            ReplicatedStorage.BackpackRemote:InvokeServer("Store", ToolName)
+        end)
+
+        task.wait(3)
+
+
+        if ToolId then
             task.spawn(function()
-                _fireproximityprompt(Workspace["IceFruit Sell"].ProximityPrompt)
+                ReplicatedStorage.BuyItemRemote:FireServer(ToolName, "Remove", ToolId)
             end)
         end
-       
-        Teleport(OLDCFrame)
-        F9Notification("Sold existing fruit cup!")
-        return
+
+        task.spawn(function()
+            ReplicatedStorage.BackpackRemote:InvokeServer("Grab", ToolName)
+        end)
+
+        marketconnection:Disconnect()
+        task.wait(1)
     end
-   
-    -- If no cup, make one and sell
-    F9Notification("Making and selling fruit cup...")
-   
-    local OLDCFrame = player.Character.HumanoidRootPart.CFrame
-   
-    local Itemz = {"FijiWater", "FreshWater", "Ice-Fruit Bag", "Ice-Fruit Cupz"}
-    local Stove = nil
-   
-    -- Find available stove
-    for _, pot in Workspace.CookingPots:GetChildren() do
-        if pot:IsA("Model") then
-            local prompt = pot:FindFirstChildWhichIsA("ProximityPrompt", true)
-            if prompt and prompt.ActionText == "Turn On" and prompt.Enabled then
-                Stove = pot
+})
+
+MainTab:CreateSection("Teleportation")
+
+local teleportLocations = {
+    { Name = "Dripstoređ",          Position = Vector3.new(67459, 10489, 551) },
+    { Name = "BankđŚ",               Position = Vector3.new(-204, 284, -1223) },
+    { Name = "Ice Boxđ",            Position = Vector3.new(-193, 284, -1169) },
+    { Name = "Bank tools / Roofđ°",  Position = Vector3.new(-384, 340, -557) },
+    { Name = "Jamaican Foodđ",      Position = Vector3.new(-670, 254, -810) },
+    { Name = "Deli and Grillđ",     Position = Vector3.new(-746, 254, -906) },
+    { Name = "Chicken and Wingsđ",  Position = Vector3.new(964, 254, -813) },
+    { Name = "Gunstore [1]đŤ",       Position = Vector3.new(-1003, 254, -817) },
+    { Name = "Gunstore [2]đŤ",       Position = Vector3.new(-202, 284, -798) },
+    { Name = "Gunstore [3]đŤ",       Position = Vector3.new(72425, 128856, -1082) },
+    { Name = "Gunstore [4]đŤ",       Position = Vector3.new(60822, 87609, -352) },
+    { Name = "Pawnshopđ",           Position = Vector3.new(-1051, 254, -815) },
+    { Name = "Laundermatđ§ş",         Position = Vector3.new(-990, 254, -686) },
+    { Name = "Backpackđ",           Position = Vector3.new(-670, 254, -681) },
+    { Name = "Tatooâď¸",            Position = Vector3.new(-637, 254, -591) },
+    { Name = "Penthouse Cook Potđ ", Position = Vector3.new(-614, 356, -683) },
+    { Name = "New Penthouseđď¸",   Position = Vector3.new(-597, 356, -714) },
+    { Name = "Old PenthouseđĄ",      Position = Vector3.new(-124, 417, -575) },
+    { Name = "Dollar Centralđ¸",     Position = Vector3.new(-389, 254, -1082) },
+    { Name = "Dealershipđ",         Position = Vector3.new(-389, 253, -1232) },
+    { Name = "mcdonaldsđ",          Position = Vector3.new(-999, 254, -1134) },
+}
+
+local player = game.Players.LocalPlayer
+
+local function teleport(x, y, z)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local hrp = character:WaitForChild("HumanoidRootPart")
+
+    humanoid:ChangeState(0)
+    repeat task.wait() until not player:GetAttribute("LastACPos")
+    hrp.CFrame = CFrame.new(x, y, z)
+end
+
+local selectedTeleport = teleportLocations[1]
+local locationNames = {}
+
+for _, location in ipairs(teleportLocations) do
+    table.insert(locationNames, location.Name)
+end
+
+MainTab:CreateDropdown({
+    Name = "Locations",
+    Options = locationNames,
+    CurrentOption = { locationNames[1] },
+    MultipleOptions = false,
+    Flag = "TeleportDropdown",
+    Callback = function(option)
+        for _, location in ipairs(teleportLocations) do
+            if location.Name == option[1] then
+                selectedTeleport = location
                 break
             end
         end
     end
-   
-    if not Stove then
-        F9Notification("No available stove found!")
-        return
-    end
-   
-    -- Buy needed items
-    for _, item in pairs(Itemz) do
-        if not player.Backpack:FindFirstChild(item) then
-            ReplicatedStorage:WaitForChild("ExoticShopRemote"):InvokeServer(item)
-            task.wait(1)
+})
+
+MainTab:CreateButton({
+    Name = "Teleport to Location",
+    Callback = function()
+        if selectedTeleport then
+            teleport(selectedTeleport.Position.X, selectedTeleport.Position.Y, selectedTeleport.Position.Z)
         end
     end
-   
-    -- Check if all items were bought
-    local Check = false
-    for _, item in pairs(Itemz) do
-        if not player.Backpack:FindFirstChild(item) then
-            Check = true
-        end
-    end
-   
-    if Check then
-        F9Notification("Shop out of stock! Wait a few minutes.")
-        return
-    end
-   
-    -- Cook the fruit cup
-    Teleport(Stove:FindFirstChild("CookPart") and Stove.CookPart.CFrame or Stove.PrimaryPart.CFrame, true)
-    task.wait(1)
-   
-    -- Hide backpack UI temporarily
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
-    player.Character.HumanoidRootPart.Anchored = true
-    task.wait(1.5)
-   
-    -- Turn on stove
-    local stovePrompt = Stove:FindFirstChildWhichIsA("ProximityPrompt", true)
-    if stovePrompt then
-        fireproximityprompt(stovePrompt)
-    end
-    task.wait(2)
-   
-    -- Add ingredients
-    for _, item in pairs({"FijiWater", "FreshWater", "Ice-Fruit Bag"}) do
-        player.Character.Humanoid:EquipTool(player.Backpack[item])
-        task.wait(1)
-        if stovePrompt then
-            fireproximityprompt(stovePrompt)
-        end
-        task.wait(3)
-    end
-   
-    -- Wait for cooking to finish
-    repeat task.wait() until
-    not (Stove:FindFirstChild("CookPart") and Stove.CookPart:FindFirstChild("Steam") and
-         Stove.CookPart.Steam:FindFirstChild("LoadUI") and Stove.CookPart.Steam.LoadUI.Enabled)
-   
-    -- Add cup
-    if not player.Character:FindFirstChild("Ice-Fruit Cupz") then
-        player.Character.Humanoid:EquipTool(player.Backpack['Ice-Fruit Cupz'])
-        task.wait(1)
-    end
-   
-    task.wait(1)
-   
-    -- Take cup from stove
-    if stovePrompt then
-        fireproximityprompt(stovePrompt)
-    end
-    task.wait(3)
-   
-    player.Character.HumanoidRootPart.Anchored = false
-   
-    -- Teleport to sell point
-    Teleport(Workspace["IceFruit Sell"].CFrame, true)
-    task.wait(1)
-   
-    player.Character.HumanoidRootPart.Anchored = true
-    task.wait(1.5)
-   
-    -- Equip cup if not equipped
-    if not player.Character:FindFirstChild("Ice-Fruit Cupz") then
-        player.Character.Humanoid:EquipTool(player.Backpack['Ice-Fruit Cupz'])
-        task.wait(1)
-    end
-   
-    -- Set prompt to instant sell
-    if Workspace["IceFruit Sell"]:FindFirstChild("ProximityPrompt") then
-        Workspace["IceFruit Sell"].ProximityPrompt.HoldDuration = 0
-    end
-   
-    -- Mass sell
-    for i = 1, 4000 do
-        task.spawn(function()
-            _fireproximityprompt(Workspace["IceFruit Sell"].ProximityPrompt)
-        end)
-    end
-   
-    -- Clean up
-    player.Character.HumanoidRootPart.Anchored = false
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
-    task.wait(0.5)
-   
-    Teleport(OLDCFrame, true)
-    task.wait(2)
-   
-    F9Notification("MAX MONEY process completed!")
+})
+
+MainTab:CreateSection("GUI's")
+
+local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+local guiMap = {
+    ["Crafting"] = { "CraftGUI", "Main", "Visible" },
+    ["Megaphone List"] = { "Bronx MessageList", "Holder", "Visible" },
+    ["Animations"] = { "Animations", "Frame", "Visible" },
+    ["Bronx Market"] = { "Bronx Market 2", nil, "Enabled" },
+    ["Bronx Tattoos"] = { "Bronx TATTOOS", nil, "Enabled" },
+    ["Bronx Clothing"] = { "Bronx CLOTHING", nil, "Enabled" },
+    ["Trunk Storage"] = { "TRUNK STORAGE", nil, "Enabled" },
+    ["Bronx Pawning"] = { "Bronx PAWNING", nil, "Enabled" },
+}
+
+local options = {}
+for name in pairs(guiMap) do
+    table.insert(options, name)
 end
 
--- Now create the Purple Glowing UI with toggle button and dynamic scaling
-local function createMobileFriendlyUI()
-    -- Create main ScreenGui
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "VALLEY.GG"
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.ResetOnSpawn = false
-   
-    -- Remove existing UI
-    local existingUI = playerGui:FindFirstChild("XylowareSafeDupeUI")
-    if existingUI then
-        existingUI:Destroy()
+local selected = {}
+
+MainTab:CreateDropdown({
+    Name            = "Select GUIs",
+    CurrentOption   = {},
+    MultipleOptions = true,
+    Options         = options,
+    Flag            = "hiih",
+    Callback        = function(Value)
+        selected = Value
     end
-   
-    ScreenGui.Parent = playerGui
-   
-    -- Calculate sizes based on device
-    local baseToggleSize = 40
-    local baseUISize = 350
-    local baseTextSize = 18
-    local baseButtonHeight = 50
-    local baseButtonText = 16
-   
-    -- Apply device scaling
-    local toggleSize = baseToggleSize * deviceInfo.buttonScale
-    local uiSize = baseUISize * deviceInfo.uiScale
-    local toggleTextSize = baseTextSize * deviceInfo.textScale
-    local buttonHeight = baseButtonHeight * deviceInfo.buttonScale
-    local buttonTextSize = baseButtonText * deviceInfo.textScale
-   
-    -- Create toggle button (always visible)
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Name = "ToggleButton"
-    ToggleButton.Text = "X" -- Old English style X
-    ToggleButton.Font = Enum.Font.GothamBlack
-    ToggleButton.TextSize = toggleTextSize
-    ToggleButton.TextColor3 = Color3.fromRGB(180, 100, 255)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    ToggleButton.BorderColor3 = Color3.fromRGB(80, 40, 150)
-    ToggleButton.BorderSizePixel = 2
-    ToggleButton.Position = UDim2.new(0, 10, 0, 10)
-    ToggleButton.Size = UDim2.new(0, toggleSize, 0, toggleSize)
-    ToggleButton.ZIndex = 100
-   
-    -- Add corner rounding
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 6)
-    ToggleCorner.Parent = ToggleButton
-   
-    -- Add glow to toggle button
-    local ToggleGlow = Instance.new("Frame")
-    ToggleGlow.Name = "ToggleGlow"
-    ToggleGlow.BackgroundColor3 = Color3.fromRGB(100, 50, 200)
-    ToggleGlow.BackgroundTransparency = 0.8
-    ToggleGlow.BorderSizePixel = 0
-    ToggleGlow.Size = UDim2.new(1, 0, 1, 0)
-    ToggleGlow.ZIndex = -1
-    ToggleGlow.Parent = ToggleButton
-   
-    local ToggleGlowCorner = Instance.new("UICorner")
-    ToggleGlowCorner.CornerRadius = UDim.new(0, 6)
-    ToggleGlowCorner.Parent = ToggleGlow
-   
-    ToggleButton.Parent = ScreenGui
-   
-    -- Main Frame (Square, mobile-friendly)
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainFrame"
-    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    MainFrame.BorderColor3 = Color3.fromRGB(40, 40, 40)
-    MainFrame.BorderSizePixel = 2
-    
-    -- Bottom-left corner positioning (like in the Axion image)
-    if isMobile then
-        -- For mobile, position it in bottom-left corner
-        -- Position: Very close to left edge (2% from left), Very close to bottom (92% from top)
-        MainFrame.Position = UDim2.new(0.02, 0, 0.92, -uiSize/2)
-    else
-        -- For desktop, keep it centered
-        MainFrame.Position = UDim2.new(0.5, -uiSize/2, 0.5, -uiSize/2)
-    end
-    
-    MainFrame.Size = UDim2.new(0, uiSize, 0, uiSize)
-    MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    MainFrame.Visible = false -- Start hidden
-    MainFrame.Parent = ScreenGui
-    -- Outer glow
-    local OuterGlow = Instance.new("Frame")
-    OuterGlow.Name = "OuterGlow"
-    OuterGlow.BackgroundColor3 = Color3.fromRGB(80, 40, 150)
-    OuterGlow.BackgroundTransparency = 0.7
-    OuterGlow.BorderSizePixel = 0
-    OuterGlow.Position = UDim2.new(-0.02, 0, -0.02, 0)
-    OuterGlow.Size = UDim2.new(1.04, 0, 1.04, 0)
-    OuterGlow.ZIndex = -1
-    OuterGlow.Parent = MainFrame
-    local OuterCorner = Instance.new("UICorner")
-    OuterCorner.CornerRadius = UDim.new(0, 8)
-    OuterCorner.Parent = OuterGlow
-    -- Main frame corner
-    local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 6)
-    MainCorner.Parent = MainFrame
-    -- Top Bar
-    local TopBar = Instance.new("Frame")
-    TopBar.Name = "TopBar"
-    TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TopBar.BorderSizePixel = 0
-    TopBar.Size = UDim2.new(1, 0, 0, 50 * deviceInfo.buttonScale)
-    TopBar.Parent = MainFrame
-    -- Title Container
-    local TitleContainer = Instance.new("Frame")
-    TitleContainer.Name = "TitleContainer"
-    TitleContainer.BackgroundTransparency = 1
-    TitleContainer.Size = UDim2.new(1, 0, 1, 0)
-    TitleContainer.Parent = TopBar
-    -- Main Title (Glowing Purple)
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Name = "TitleLabel"
-    TitleLabel.Text = "VALLEY.GG"
-    TitleLabel.Font = Enum.Font.GothamBlack
-    TitleLabel.TextSize = (isMobile and 22 or 20) * deviceInfo.textScale
-    TitleLabel.TextColor3 = Color3.fromRGB(180, 100, 255)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Size = UDim2.new(0.7, 0, 0.6, 0)
-    TitleLabel.Position = UDim2.new(0.15, 0, 0.2, 0)
-    TitleLabel.Parent = TitleContainer
-    -- Subtitle
-    local SubtitleLabel = Instance.new("TextLabel")
-    SubtitleLabel.Name = "SubtitleLabel"
-    SubtitleLabel.Text = "Dupe&Max Money"
-    SubtitleLabel.Font = Enum.Font.GothamBold
-    SubtitleLabel.TextSize = (isMobile and 14 or 12) * deviceInfo.textScale
-    SubtitleLabel.TextColor3 = Color3.fromRGB(160, 90, 240)
-    SubtitleLabel.BackgroundTransparency = 1
-    SubtitleLabel.Position = UDim2.new(0.15, 0, 0.6, 0)
-    SubtitleLabel.Size = UDim2.new(0.7, 0, 0.4, 0)
-    SubtitleLabel.Parent = TitleContainer
-    -- Close button in UI
-    local closeBtnSize = 25 * deviceInfo.buttonScale
-    local CloseButton = Instance.new("TextButton")
-    CloseButton.Name = "CloseButton"
-    CloseButton.Text = "✕"
-    CloseButton.Font = Enum.Font.GothamBold
-    CloseButton.TextSize = (isMobile and 20 or 18) * deviceInfo.textScale
-    CloseButton.TextColor3 = Color3.fromRGB(255, 120, 120)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(40, 20, 40)
-    CloseButton.BorderColor3 = Color3.fromRGB(100, 40, 100)
-    CloseButton.BorderSizePixel = 2
-    CloseButton.Position = UDim2.new(1, -(closeBtnSize + 15), 0, 10)
-    CloseButton.Size = UDim2.new(0, closeBtnSize, 0, closeBtnSize)
-    CloseButton.Parent = TopBar
-    local CloseCorner = Instance.new("UICorner")
-    CloseCorner.CornerRadius = UDim.new(0, 6)
-    CloseCorner.Parent = CloseButton
-    -- Content Area
-    local ContentArea = Instance.new("Frame")
-    ContentArea.Name = "ContentArea"
-    ContentArea.BackgroundTransparency = 1
-    ContentArea.Position = UDim2.new(0, 15, 0, 60 * deviceInfo.buttonScale)
-    ContentArea.Size = UDim2.new(1, -30, 1, -(75 * deviceInfo.buttonScale))
-    ContentArea.Parent = MainFrame
-    
-    -- Create tabs container
-    local TabsContainer = Instance.new("Frame")
-    TabsContainer.Name = "TabsContainer"
-    TabsContainer.BackgroundTransparency = 1
-    TabsContainer.Size = UDim2.new(1, 0, 0, 40 * deviceInfo.buttonScale)
-    TabsContainer.Parent = ContentArea
-    
-    -- Dupe Tab Button
-    local DupeTabButton = Instance.new("TextButton")
-    DupeTabButton.Name = "DupeTabButton"
-    DupeTabButton.Text = "🔒 DUPE"
-    DupeTabButton.Font = Enum.Font.GothamSemibold
-    DupeTabButton.TextSize = buttonTextSize
-    DupeTabButton.TextColor3 = Color3.fromRGB(180, 100, 255)
-    DupeTabButton.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
-    DupeTabButton.BorderColor3 = Color3.fromRGB(80, 40, 150)
-    DupeTabButton.BorderSizePixel = 2
-    DupeTabButton.Position = UDim2.new(0, 0, 0, 0)
-    DupeTabButton.Size = UDim2.new(0.5, -2, 1, 0)
-    DupeTabButton.Parent = TabsContainer
-    
-    local DupeTabCorner = Instance.new("UICorner")
-    DupeTabCorner.CornerRadius = UDim.new(0, 6)
-    DupeTabCorner.Parent = DupeTabButton
-    
-    -- Quick Buy Tab Button
-    local QuickBuyTabButton = Instance.new("TextButton")
-    QuickBuyTabButton.Name = "QuickBuyTabButton"
-    QuickBuyTabButton.Text = "🚀 QUICK BUY"
-    QuickBuyTabButton.Font = Enum.Font.GothamSemibold
-    QuickBuyTabButton.TextSize = buttonTextSize
-    QuickBuyTabButton.TextColor3 = Color3.fromRGB(255, 140, 0)
-    QuickBuyTabButton.BackgroundColor3 = Color3.fromRGB(60, 40, 20)
-    QuickBuyTabButton.BorderColor3 = Color3.fromRGB(100, 60, 30)
-    QuickBuyTabButton.BorderSizePixel = 2
-    QuickBuyTabButton.Position = UDim2.new(0.5, 2, 0, 0)
-    QuickBuyTabButton.Size = UDim2.new(0.5, -2, 1, 0)
-    QuickBuyTabButton.Parent = TabsContainer
-    
-    local QuickBuyTabCorner = Instance.new("UICorner")
-    QuickBuyTabCorner.CornerRadius = UDim.new(0, 6)
-    QuickBuyTabCorner.Parent = QuickBuyTabButton
-    
-    -- Tab Content Area
-    local TabContentArea = Instance.new("Frame")
-    TabContentArea.Name = "TabContentArea"
-    TabContentArea.BackgroundTransparency = 1
-    TabContentArea.Position = UDim2.new(0, 0, 0, 45 * deviceInfo.buttonScale)
-    TabContentArea.Size = UDim2.new(1, 0, 1, -45 * deviceInfo.buttonScale)
-    TabContentArea.Parent = ContentArea
-    
-    -- ===== DUPE TAB CONTENT =====
-    local DupeContent = Instance.new("Frame")
-    DupeContent.Name = "DupeContent"
-    DupeContent.BackgroundTransparency = 1
-    DupeContent.Size = UDim2.new(1, 0, 1, 0)
-    DupeContent.Visible = true
-    DupeContent.Parent = TabContentArea
-    
-    -- Buttons Container with scrolling for mobile
-    local DupeButtonsContainer = Instance.new("ScrollingFrame")
-    DupeButtonsContainer.Name = "DupeButtonsContainer"
-    DupeButtonsContainer.BackgroundTransparency = 1
-    DupeButtonsContainer.Size = UDim2.new(1, 0, 1, 0)
-    DupeButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, 370 * deviceInfo.buttonScale)
-    DupeButtonsContainer.ScrollBarThickness = (isMobile and 6 or 4) * deviceInfo.buttonScale
-    DupeButtonsContainer.ScrollBarImageColor3 = Color3.fromRGB(100, 50, 200)
-    DupeButtonsContainer.Parent = DupeContent
-    
-    -- ===== QUICK BUY TAB CONTENT =====
-    local QuickBuyContent = Instance.new("Frame")
-    QuickBuyContent.Name = "QuickBuyContent"
-    QuickBuyContent.BackgroundTransparency = 1
-    QuickBuyContent.Size = UDim2.new(1, 0, 1, 0)
-    QuickBuyContent.Visible = false
-    QuickBuyContent.Parent = TabContentArea
-    
-    -- Gun List Container
-    local GunListContainer = Instance.new("ScrollingFrame")
-    GunListContainer.Name = "GunListContainer"
-    GunListContainer.BackgroundTransparency = 1
-    GunListContainer.Size = UDim2.new(1, 0, 0.6, 0)
-    GunListContainer.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be updated
-    GunListContainer.ScrollBarThickness = 6 * deviceInfo.buttonScale
-    GunListContainer.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 0)
-    GunListContainer.Parent = QuickBuyContent
-    
-    -- Purchase Button (Orange theme)
-    local PurchaseButton = Instance.new("TextButton")
-    PurchaseButton.Name = "PurchaseButton"
-    PurchaseButton.Text = "🚀 PURCHASE SELECTED"
-    PurchaseButton.Font = Enum.Font.GothamSemibold
-    PurchaseButton.TextSize = buttonTextSize
-    PurchaseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    PurchaseButton.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
-    PurchaseButton.BorderColor3 = Color3.fromRGB(120, 60, 30)
-    PurchaseButton.BorderSizePixel = 2
-    PurchaseButton.Position = UDim2.new(0, 0, 0.65, 0)
-    PurchaseButton.Size = UDim2.new(1, 0, 0, buttonHeight)
-    PurchaseButton.Parent = QuickBuyContent
-    
-    local PurchaseCorner = Instance.new("UICorner")
-    PurchaseCorner.CornerRadius = UDim.new(0, 6)
-    PurchaseCorner.Parent = PurchaseButton
-    
-    -- Refresh Button
-    local RefreshButton = Instance.new("TextButton")
-    RefreshButton.Name = "RefreshButton"
-    RefreshButton.Text = "🔄 REFRESH GUN LIST"
-    RefreshButton.Font = Enum.Font.GothamSemibold
-    RefreshButton.TextSize = buttonTextSize * 0.9
-    RefreshButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    RefreshButton.BackgroundColor3 = Color3.fromRGB(60, 40, 20)
-    RefreshButton.BorderColor3 = Color3.fromRGB(100, 60, 30)
-    RefreshButton.BorderSizePixel = 2
-    RefreshButton.Position = UDim2.new(0, 0, 0.8, 0)
-    RefreshButton.Size = UDim2.new(1, 0, 0, buttonHeight * 0.8)
-    RefreshButton.Parent = QuickBuyContent
-    
-    local RefreshCorner = Instance.new("UICorner")
-    RefreshCorner.CornerRadius = UDim.new(0, 6)
-    RefreshCorner.Parent = RefreshButton
-    
-    -- Selected gun label
-    local SelectedLabel = Instance.new("TextLabel")
-    SelectedLabel.Name = "SelectedLabel"
-    SelectedLabel.Text = "Selected: None"
-    SelectedLabel.Font = Enum.Font.GothamMedium
-    SelectedLabel.TextSize = buttonTextSize * 0.9
-    SelectedLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
-    SelectedLabel.BackgroundTransparency = 1
-    SelectedLabel.Position = UDim2.new(0, 0, 0.9, 0)
-    SelectedLabel.Size = UDim2.new(1, 0, 0, 30)
-    SelectedLabel.Parent = QuickBuyContent
-    
-    -- Function to create glowing button for dupe tab
-    local function createGlowingButton(name, text, positionY, halfWidth)
-        local scaledButtonHeight = buttonHeight
-        local scaledTextSize = buttonTextSize
-       
-        local ButtonFrame = Instance.new("Frame")
-        ButtonFrame.Name = name .. "ButtonFrame"
-        ButtonFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-        ButtonFrame.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        ButtonFrame.BorderSizePixel = 2
-       
-        if halfWidth then
-            ButtonFrame.Position = UDim2.new(0, 0, 0, positionY * deviceInfo.buttonScale)
-            ButtonFrame.Size = UDim2.new(0.48, 0, 0, scaledButtonHeight)
-        else
-            ButtonFrame.Position = UDim2.new(0, 0, 0, positionY * deviceInfo.buttonScale)
-            ButtonFrame.Size = UDim2.new(1, 0, 0, scaledButtonHeight)
-        end
-       
-        ButtonFrame.Parent = DupeButtonsContainer
-       
-        local ButtonCorner = Instance.new("UICorner")
-        ButtonCorner.CornerRadius = UDim.new(0, 6)
-        ButtonCorner.Parent = ButtonFrame
-       
-        -- Button glow
-        local ButtonGlow = Instance.new("Frame")
-        ButtonGlow.Name = "ButtonGlow"
-        ButtonGlow.BackgroundColor3 = Color3.fromRGB(100, 50, 200)
-        ButtonGlow.BackgroundTransparency = 0.8
-        ButtonGlow.BorderSizePixel = 0
-        ButtonGlow.Size = UDim2.new(1, 0, 1, 0)
-        ButtonGlow.ZIndex = -1
-        ButtonGlow.Parent = ButtonFrame
-       
-        local GlowCorner = Instance.new("UICorner")
-        GlowCorner.CornerRadius = UDim.new(0, 6)
-        GlowCorner.Parent = ButtonGlow
-       
-        -- Button label
-        local ButtonLabel = Instance.new("TextLabel")
-        ButtonLabel.Name = name .. "ButtonLabel"
-        ButtonLabel.Text = text
-        ButtonLabel.Font = Enum.Font.GothamSemibold
-        ButtonLabel.TextSize = scaledTextSize
-        ButtonLabel.TextColor3 = Color3.fromRGB(200, 160, 255)
-        ButtonLabel.BackgroundTransparency = 1
-        ButtonLabel.Size = UDim2.new(1, 0, 1, 0)
-        ButtonLabel.Parent = ButtonFrame
-       
-        -- Button
-        local Button = Instance.new("TextButton")
-        Button.Name = name .. "Button"
-        Button.Text = ""
-        Button.BackgroundTransparency = 1
-        Button.Size = UDim2.new(1, 0, 1, 0)
-        Button.Parent = ButtonFrame
-       
-        -- Hover effects (only on desktop)
-        if not isMobile then
-            Button.MouseEnter:Connect(function()
-                ButtonFrame.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
-                ButtonFrame.BorderColor3 = Color3.fromRGB(120, 70, 220)
-            end)
-           
-            Button.MouseLeave:Connect(function()
-                ButtonFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-                ButtonFrame.BorderColor3 = Color3.fromRGB(80, 40, 150)
-            end)
-        end
-       
-        return Button, ButtonLabel, ButtonFrame
-    end
-    
-    -- Create dupe buttons
-    local button1, label1, frame1 = createGlowingButton("Auto", "🔒 AUTO SAFE DUPE", 0, false)
-    local button1b, label1b, frame1b = createGlowingButton("Backpack", "🎒 BACKPACK DUPE", 65, false)
-    local button1c, label1c, frame1c = createGlowingButton("Trunk", "🚗 TRUNK DUPE", 130, false)
-    local button2, label2, frame2 = createGlowingButton("ResetTarget", "🗑️ RESET TARGET", 195, true)
-    local button3, label3, frame3 = createGlowingButton("Teleport", "📍 TP CLOSEST SAFE", 195, true)
-    local button4, label4, frame4 = createGlowingButton("MaxMoney", "💰 MAX MONEY", 260, false)
-    local button5, label5, frame5 = createGlowingButton("Reset", "🔄 RESET COOLDOWN", 325, false)
-    
-    -- Position the half-width buttons side by side
-    frame2.Position = UDim2.new(0, 0, 0, 195 * deviceInfo.buttonScale)
-    frame2.Size = UDim2.new(0.48, 0, 0, buttonHeight)
-   
-    frame3.Position = UDim2.new(0.52, 0, 0, 195 * deviceInfo.buttonScale)
-    frame3.Size = UDim2.new(0.48, 0, 0, buttonHeight)
-    
-    -- Button functions
-    button1.MouseButton1Click:Connect(function()
-        if AutoSafeDupeEnabled then
-            stopAutoSafeDupeMacro()
-            label1.Text = "🔒 AUTO SAFE DUPE"
-            frame1.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        else
-            startAutoSafeDupeMacro()
-            label1.Text = "🛑 STOP SAFE DUPE"
-            frame1.BorderColor3 = Color3.fromRGB(255, 80, 80)
-        end
-    end)
-    
-    button1b.MouseButton1Click:Connect(function()
-        if AutoBackpackDupeEnabled then
-            stopAutoBackpackDupeMacro()
-            label1b.Text = "🎒 BACKPACK DUPE"
-            frame1b.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        else
-            startAutoBackpackDupeMacro()
-            label1b.Text = "🛑 STOP BACKPACK DUPE"
-            frame1b.BorderColor3 = Color3.fromRGB(255, 80, 80)
-        end
-    end)
-    
-    button1c.MouseButton1Click:Connect(function()
-        if AutoTrunkDupeEnabled then
-            stopAutoTrunkDupeMacro()
-            label1c.Text = "🚗 TRUNK DUPE"
-            frame1c.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        else
-            startAutoTrunkDupeMacro()
-            label1c.Text = "🛑 STOP TRUNK DUPE"
-            frame1c.BorderColor3 = Color3.fromRGB(255, 80, 80)
-        end
-    end)
-   
-    button2.MouseButton1Click:Connect(function()
-        resetTargetWeapon()
-    end)
-   
-    button3.MouseButton1Click:Connect(function()
-        teleportToClosestSafe()
-    end)
-   
-    button4.MouseButton1Click:Connect(function()
-        maxMoneyFunction()
-    end)
-   
-    button5.MouseButton1Click:Connect(function()
-        resetAllCooldowns()
-    end)
-    
-    -- Quick Buy Variables
-    local selectedGun = nil
-    local gunButtons = {}
-    
-    -- Function to create gun button for Quick Buy tab
-    local function createGunButton(gunName, index)
-        local buttonFrame = Instance.new("Frame")
-        buttonFrame.Name = gunName .. "ButtonFrame"
-        buttonFrame.BackgroundColor3 = Color3.fromRGB(40, 30, 20)
-        buttonFrame.BorderColor3 = Color3.fromRGB(100, 60, 30)
-        buttonFrame.BorderSizePixel = 2
-        buttonFrame.Position = UDim2.new(0, 0, 0, (index - 1) * 40 * deviceInfo.buttonScale)
-        buttonFrame.Size = UDim2.new(1, 0, 0, 35 * deviceInfo.buttonScale)
-        buttonFrame.Parent = GunListContainer
-        
-        local buttonCorner = Instance.new("UICorner")
-        buttonCorner.CornerRadius = UDim.new(0, 4)
-        buttonCorner.Parent = buttonFrame
-        
-        local buttonLabel = Instance.new("TextLabel")
-        buttonLabel.Name = gunName .. "ButtonLabel"
-        buttonLabel.Text = "🔫 " .. gunName
-        buttonLabel.Font = Enum.Font.GothamMedium
-        buttonLabel.TextSize = buttonTextSize * 0.9
-        buttonLabel.TextColor3 = Color3.fromRGB(220, 180, 120)
-        buttonLabel.BackgroundTransparency = 1
-        buttonLabel.Size = UDim2.new(1, -10, 1, 0)
-        buttonLabel.Position = UDim2.new(0, 10, 0, 0)
-        buttonLabel.Parent = buttonFrame
-        
-        local button = Instance.new("TextButton")
-        button.Name = gunName .. "Button"
-        button.Text = ""
-        button.BackgroundTransparency = 1
-        button.Size = UDim2.new(1, 0, 1, 0)
-        button.Parent = buttonFrame
-        
-        -- Store reference
-        gunButtons[gunName] = {
-            frame = buttonFrame,
-            label = buttonLabel,
-            button = button
-        }
-        
-        button.MouseButton1Click:Connect(function()
-            -- Deselect all other buttons
-            for name, btnData in pairs(gunButtons) do
-                if name ~= gunName then
-                    btnData.frame.BackgroundColor3 = Color3.fromRGB(40, 30, 20)
-                    btnData.frame.BorderColor3 = Color3.fromRGB(100, 60, 30)
-                    btnData.label.Text = "🔫 " .. name
+})
+
+MainTab:CreateToggle({
+    Name = "Open Selected GUIs",
+    CurrentValue = false,
+    Flag = "DKhi",
+    Callback = function(state)
+        for _, name in ipairs(selected) do
+            local path = guiMap[name]
+            local gui = PlayerGui:FindFirstChild(path[1])
+            if gui then
+                local target = path[2] and gui:FindFirstChild(path[2]) or gui
+                if target then
+                    target[path[3]] = state
                 end
             end
-            
-            -- Select this button
-            buttonFrame.BackgroundColor3 = Color3.fromRGB(60, 40, 20)
-            buttonFrame.BorderColor3 = Color3.fromRGB(255, 140, 0)
-            buttonLabel.Text = "✅ " .. gunName
-            
-            selectedGun = gunName
-            SelectedLabel.Text = "Selected: " .. gunName
-        end)
+        end
     end
-    
-    -- Function to refresh gun list
-    local function refreshGunList()
-        -- Clear existing buttons
-        for name, btnData in pairs(gunButtons) do
-            btnData.frame:Destroy()
+})
+
+MainTab:CreateSection("Megaphone")
+
+local selectedMessage = "Hands UP!"
+
+MainTab:CreateDropdown({
+    Name = "Select Megaphone Message",
+    Options = {
+        "Hands UP!",
+        "Driver Pull Over!",
+        "Move it FOLKS!",
+        "PULL OVER NOW!"
+    },
+    CurrentOption = { "Hands UP!" },
+    MultiSelection = false,
+    Flag = "MegaphoneMessage",
+    Callback = function(Options)
+        selectedItem = Options[1]
+    end,
+})
+
+MainTab:CreateButton({
+    Name = "Play Selected Sound",
+    Callback = function()
+        if selectedItem then
+            local args = { selectedItem }
+            game:GetService("ReplicatedStorage"):WaitForChild("MegaphoneRemote"):FireServer(unpack(args))
         end
-        gunButtons = {}
-        
-        -- Get new gun list
-        local guns = getGunList()
-        
-        -- Update container size
-        GunListContainer.CanvasSize = UDim2.new(0, 0, 0, #guns * 40 * deviceInfo.buttonScale)
-        
-        -- Create buttons for each gun
-        for i, gunName in ipairs(guns) do
-            createGunButton(gunName, i)
-        end
-        
-        if #guns > 0 then
-            SelectedLabel.Text = "Found " .. #guns .. " guns. Select one."
-        else
-            SelectedLabel.Text = "No guns found in GUNS folder."
-        end
-        
-        selectedGun = nil
     end
-    
-    -- Purchase button click
-    PurchaseButton.MouseButton1Click:Connect(function()
-        if not selectedGun then
-            F9Notification("❌ Please select a gun first")
+})
+
+MainTab:CreateSection("AutoBuy")
+
+local selectedItem = "RawChicken"
+
+MainTab:CreateDropdown({
+    Name = "Select Item",
+    Options = {
+        "RawChicken",
+        "PinkCamo Gloves",
+        "RedGloves",
+        "BluCamo Gloves",
+        "BluShiestyCam",
+        "PurpleCamoGloves",
+        "Yello Camo Gloves",
+        "Shiesty",
+        "Water",
+        "BluGloves",
+        "White Gloves",
+        "BlackGloves",
+        "RawSteak",
+        "Yello Camo Gloves",
+        "YelloShiesty",
+        "PinkCamo Gloves",
+        "WhiteShiesty",
+        "RedCamo Gloves",
+
+    },
+    CurrentOption = { "RawChicken" },
+    MultiSelection = true,
+    Flag = "Buy",
+    Callback = function(Options)
+        selectedItem = Options[1]
+    end,
+})
+
+MainTab:CreateButton({
+    Name = "Buy Selected Item",
+    Callback = function()
+        if selectedItem then
+            local args = { selectedItem }
+            Game:GetService("ReplicatedStorage"):WaitForChild("ShopRemote"):InvokeServer(unpack(args))
+        end
+    end
+})
+
+MainTab:CreateSection("Car")
+
+local player = game.Players.LocalPlayer
+
+local function unlockAllCars()
+    local civCarsFolder = workspace:FindFirstChild("CivCars")
+    if not civCarsFolder then
+        warn("CivCars folder not found in workspace.")
+        return
+    end
+
+    local unlockedCount = 0
+
+    for _, car in ipairs(civCarsFolder:GetChildren()) do
+        local driveSeat = car:FindFirstChildWhichIsA("VehicleSeat", true)
+        if driveSeat then
+            driveSeat.Disabled = false
+            unlockedCount = unlockedCount + 1
+        end
+    end
+
+    pcall(function()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Car Unlocker",
+            Text = "â Unlocked " .. unlockedCount .. " cars!",
+            Duration = 5
+        })
+    end)
+end
+
+MainTab:CreateButton({
+    Name = "Unlock All Cars",
+    Callback = function()
+        unlockAllCars()
+    end
+})
+
+MainTab:CreateButton({
+    Name = "Bring My Car",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        local civCars = workspace:FindFirstChild("CivCars")
+        if not civCars then return end
+
+        local myCar = nil
+
+        for _, car in ipairs(civCars:GetChildren()) do
+            local seat = car:FindFirstChildWhichIsA("VehicleSeat", true)
+            if seat and seat:IsA("VehicleSeat") and seat:FindFirstChild("Owner") then
+                local owner = seat:FindFirstChild("Owner")
+                if owner:IsA("ObjectValue") and owner.Value == player then
+                    myCar = car
+                    break
+                end
+            elseif seat and seat:IsA("VehicleSeat") and seat:GetAttribute("Owner") == player.Name then
+                myCar = car
+                break
+            end
+        end
+
+        if not myCar then
+            warn("Your car couldn't be found.")
             return
         end
-        
-        PurchaseButton.Text = "🔄 PURCHASING..."
-        PurchaseButton.BackgroundColor3 = Color3.fromRGB(150, 80, 0)
-        
-        local success = purchaseGun(selectedGun)
-        
-        if success then
-            PurchaseButton.Text = "✅ PURCHASE COMPLETE"
-            F9Notification("✅ Purchased: " .. selectedGun)
-            task.wait(1)
-        else
-            PurchaseButton.Text = "❌ PURCHASE FAILED"
-            task.wait(1)
-        end
-        
-        PurchaseButton.Text = "🚀 PURCHASE SELECTED"
-        PurchaseButton.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
-    end)
-    
-    -- Refresh button click
-    RefreshButton.MouseButton1Click:Connect(function()
-        RefreshButton.Text = "🔄 REFRESHING..."
-        refreshGunList()
-        RefreshButton.Text = "🔄 REFRESH GUN LIST"
-    end)
-    
-    -- Tab switching
-    DupeTabButton.MouseButton1Click:Connect(function()
-        DupeContent.Visible = true
-        QuickBuyContent.Visible = false
-        DupeTabButton.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
-        DupeTabButton.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        QuickBuyTabButton.BackgroundColor3 = Color3.fromRGB(60, 40, 20)
-        QuickBuyTabButton.BorderColor3 = Color3.fromRGB(100, 60, 30)
-    end)
-    
-    QuickBuyTabButton.MouseButton1Click:Connect(function()
-        DupeContent.Visible = false
-        QuickBuyContent.Visible = true
-        DupeTabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-        DupeTabButton.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        QuickBuyTabButton.BackgroundColor3 = Color3.fromRGB(80, 50, 25)
-        QuickBuyTabButton.BorderColor3 = Color3.fromRGB(255, 140, 0)
-        
-        -- Refresh gun list when switching to Quick Buy tab
-        refreshGunList()
-    end)
-    
-    -- Close button in UI function
-    CloseButton.MouseButton1Click:Connect(function()
-        MainFrame.Visible = false
-        uiVisible = false
-        ToggleButton.TextColor3 = Color3.fromRGB(180, 100, 255)
-        ToggleButton.BorderColor3 = Color3.fromRGB(80, 40, 150)
-    end)
-    
-    -- Toggle button function
-    local function toggleUI()
-        uiVisible = not uiVisible
-        MainFrame.Visible = uiVisible
-       
-        -- Change toggle button text/color when UI is visible
-        if uiVisible then
-            ToggleButton.TextColor3 = Color3.fromRGB(255, 100, 100)
-            ToggleButton.BorderColor3 = Color3.fromRGB(255, 80, 80)
-        else
-            ToggleButton.TextColor3 = Color3.fromRGB(180, 100, 255)
-            ToggleButton.BorderColor3 = Color3.fromRGB(80, 40, 150)
-        end
-    end
-    
-    ToggleButton.MouseButton1Click:Connect(toggleUI)
-    
-    -- Draggable functionality for main frame - SIMPLIFIED VERSION
-    local dragging, dragInput, dragStart, startPos
-    TopBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
 
-    TopBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-
-    -- Draggable functionality for toggle button - SIMPLIFIED VERSION
-    local toggleDragging, toggleDragInput, toggleDragStart, toggleStartPos
-    ToggleButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            toggleDragging = true
-            toggleDragStart = input.Position
-            toggleStartPos = ToggleButton.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    toggleDragging = false
-                end
-            end)
-        end
-    end)
-
-    ToggleButton.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            toggleDragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == toggleDragInput and toggleDragging then
-            local delta = input.Position - toggleDragStart
-            ToggleButton.Position = UDim2.new(toggleStartPos.X.Scale, toggleStartPos.X.Offset + delta.X, toggleStartPos.Y.Scale, toggleStartPos.Y.Offset + delta.Y)
-        end
-    end)
-    
-    -- Glowing animation for main UI
-    local glowIntensity = 0
-    local glowDirection = 1
-    local glowConnection
-    local function startGlowAnimation()
-        if glowConnection then
-            glowConnection:Disconnect()
-        end
-       
-        glowConnection = RunService.RenderStepped:Connect(function(deltaTime)
-            if not uiVisible then return end
-           
-            glowIntensity = glowIntensity + (deltaTime * glowDirection * 2)
-           
-            if glowIntensity > 1 then
-                glowIntensity = 1
-                glowDirection = -1
-            elseif glowIntensity < 0.3 then
-                glowIntensity = 0.3
-                glowDirection = 1
+        if not myCar.PrimaryPart then
+            local primary = myCar:FindFirstChild("PrimaryPart") or myCar:FindFirstChildWhichIsA("BasePart")
+            if primary then
+                myCar.PrimaryPart = primary
+            else
+                warn("Your car has no identifiable PrimaryPart.")
+                return
             end
-           
-            -- Pulsing glow for title
-            local glowColor = Color3.fromRGB(
-                math.floor(180 * glowIntensity),
-                math.floor(100 * glowIntensity),
-                math.floor(255 * glowIntensity)
-            )
-           
-            TitleLabel.TextColor3 = glowColor
-           
-            -- Pulsing glow for frame
-            local frameGlow = Color3.fromRGB(
-                math.floor(80 * (0.5 + glowIntensity * 0.5)),
-                math.floor(40 * (0.5 + glowIntensity * 0.5)),
-                math.floor(150 * (0.5 + glowIntensity * 0.5))
-            )
-           
-            OuterGlow.BackgroundColor3 = frameGlow
-            OuterGlow.BackgroundTransparency = 0.7 - (glowIntensity * 0.2)
-        end)
-    end
-    -- Start glow animation
-    startGlowAnimation()
-   
-    -- Cleanup when ScreenGui is destroyed
-    ScreenGui.Destroying:Connect(function()
-        if glowConnection then
-            glowConnection:Disconnect()
         end
+
+        myCar:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -12))
+    end,
+})
+
+
+MainTab:CreateButton({
+    Name = "Steal Nearest Car",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:WaitForChild("Humanoid")
+
+        local function getNearestCarWithSeat()
+            local civCarsFolder = workspace:FindFirstChild("CivCars")
+            if not civCarsFolder then return nil end
+
+            local closestSeat = nil
+            local shortestDistance = math.huge
+
+            for _, car in ipairs(civCarsFolder:GetChildren()) do
+                local seat = car:FindFirstChildWhichIsA("VehicleSeat", true)
+                if seat and seat.Occupant == nil then
+                    local distance = (seat.Position - hrp.Position).Magnitude
+                    if distance < shortestDistance then
+                        closestSeat = seat
+                        shortestDistance = distance
+                    end
+                end
+            end
+
+            return closestSeat
+        end
+
+        local function teleportSafely(targetCFrame)
+            humanoid:ChangeState(0)
+            repeat task.wait() until not player:GetAttribute("LastACPos")
+            hrp.CFrame = targetCFrame
+        end
+
+        local function stealNearestCar()
+            local seat = getNearestCarWithSeat()
+            if seat then
+                teleportSafely(seat.CFrame + Vector3.new(0, 3, 0))
+            else
+                warn("No available car seat found.")
+            end
+        end
+
+        stealNearestCar()
+    end,
+})
+
+
+
+local CombatTab = Window:CreateTab("Combat", nil)
+CombatTab:CreateSection("Fist Modifications")
+
+local function supportsRequire()
+    return true
+end
+
+CombatTab:CreateToggle({
+    Name = "Anti Cooldown Swing",
+    CurrentValue = false,
+    Flag = "AntiCooldownSwing",
+    Callback = function(value)
+        if not supportsRequire() then
+            Rayfield:Notify({
+                Title = "SleepyHub",
+                Content = "Your executor doesn't support this. We recommend using Wave/Synapse-Z",
+                Duration = 5,
+                Image = 4483362458,
+            })
+            return
+        end
+        local tool = game.Players.LocalPlayer.Character and
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Melee_Settings") then
+            local settings = require(tool.Melee_Settings)
+            settings.SwingCooldown = value and 0 or nil
+        end
+    end,
+})
+
+CombatTab:CreateToggle({
+    Name = "Anti Cooldown Stomp",
+    CurrentValue = false,
+    Flag = "AntiCooldownStomp",
+    Callback = function(value)
+        if not supportsRequire() then
+            Rayfield:Notify({
+                Title = "SleepyHub",
+                Content = "Your executor doesn't support this. We recommend using Wave/Synapse-Z",
+                Duration = 5,
+                Image = 4483362458,
+            })
+            return
+        end
+        local tool = game.Players.LocalPlayer.Character and
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Melee_Settings") then
+            local settings = require(tool.Melee_Settings)
+            settings.StompCooldown = value and 0 or nil
+        end
+    end,
+})
+
+CombatTab:CreateToggle({
+    Name = "Anti Cooldown Attack",
+    CurrentValue = false,
+    Flag = "AntiCooldownAttack",
+    Callback = function(value)
+        if not supportsRequire() then
+            Rayfield:Notify({
+                Title = "SleepyHub",
+                Content = "Your executor doesn't support this. We recommend using Wave/Synapse-Z",
+                Duration = 5,
+                Image = 4483362458,
+            })
+            return
+        end
+        local tool = game.Players.LocalPlayer.Character and
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Melee_Settings") then
+            local settings = require(tool.Melee_Settings)
+            settings.AttackCooldown = value and 0 or nil
+        end
+    end,
+})
+
+
+CombatTab:CreateSection("Weapon Modifications")
+
+CombatTab:CreateParagraph({ Title = "Warning!", Content =
+"If the gun Mods dont work it is your exectuor please use a 80% unc one if wanna use gun mods," })
+
+CombatTab:CreateToggle({
+    Name = "1 Tap",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            local setting = require(tool.Setting)
+            setting.BaseDamage = Value and 9e9 or 25
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Infinite Ammo",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            local setting = require(tool.Setting)
+            setting.LimitedAmmoEnabled = not Value
+            if Value then
+                setting.MaxAmmo = 100000000
+                setting.AmmoPerMag = 10000000
+                setting.Ammo = 100000000
+            end
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Infinite Mag",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            require(tool.Setting).AmmoPerMag = 1000000000
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Infinite Range",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            require(tool.Setting).Range = 9e9
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Fully Automatic",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            require(tool.Setting).Auto = 9e9
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Disable Jamming",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            require(tool.Setting).JamChance = 0
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Disable Recoil",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Settings") then
+            local settings = require(tool.Settings)
+            settings.Recoil = Value and 0 or 1
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Enable Sniper Mode",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character and
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            require(tool.Setting).SniperEnabled = Value
+        end
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Enable Auto Reload",
+    CurrentValue = false,
+    Callback = function(Value)
+        local tool = game.Players.LocalPlayer.Character and
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Setting") then
+            require(tool.Setting).AutoReload = Value
+        end
+    end
+})
+
+CombatTab:CreateSection("Aimbot")
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local enabled = false
+local lockOnTarget = nil
+local selectedKey = Enum.KeyCode.K
+
+local function keyNameToEnum(keyName)
+    local success, key = pcall(function()
+        return Enum.KeyCode[keyName]
     end)
-   
-    return ScreenGui, ToggleButton, MainFrame
+    return success and key or Enum.KeyCode.K
 end
--- Create the UI
-local success, result = pcall(createMobileFriendlyUI)
-if success then
-    F9Notification("🔒 Auto Safe Dupe Loaded")
-    F9Notification("🎒 Backpack Dupe Added")
-    F9Notification("🚗 Trunk Dupe Added")
-    F9Notification("🚀 Quick Buy System Added")
-    F9Notification("📱 Device: " .. deviceInfo.deviceType)
-    F9Notification("🖼️ Screen: " .. deviceInfo.screenSize.X .. "x" .. deviceInfo.screenSize.Y)
-    F9Notification("⚖️ UI Scale: " .. deviceInfo.uiScale .. "x")
-    print("✅ Combined UI loaded successfully with auto-scaling!")
-    print("💡 Use the tabs to switch between Dupe and Quick Buy features!")
+
+CombatTab:CreateToggle({
+    Name = "Enable Aimbot",
+    Flag = "LockOnEnabled",
+    CurrentValue = false,
+    Callback = function(value)
+        enabled = value
+        if not enabled then
+            lockOnTarget = nil
+        else
+            lockOnTarget = getClosestPlayer()
+        end
+    end,
+})
+
+CombatTab:CreateInput({
+    Name = "Keybind",
+    PlaceholderText = "Input",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        local key = keyNameToEnum(text:upper())
+        selectedKey = key
+    end
+})
+
+function getClosestPlayer()
+    local closest = nil
+    local shortestDist = math.huge
+    local char = localPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            local head = player.Character:FindFirstChild("Head")
+            if humanoid and humanoid.Health > 0 and head then
+                local dist = (head.Position - char.HumanoidRootPart.Position).Magnitude
+                if dist < shortestDist then
+                    shortestDist = dist
+                    closest = head
+                end
+            end
+        end
+    end
+    return closest
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == selectedKey then
+        enabled = not enabled
+        ToggleLockOn:Set(enabled)
+        if enabled then
+            lockOnTarget = getClosestPlayer()
+        else
+            lockOnTarget = nil
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if enabled and lockOnTarget and lockOnTarget.Parent and lockOnTarget:IsDescendantOf(workspace) then
+        local humanoid = lockOnTarget.Parent:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.Health > 0 then
+            camera.CFrame = CFrame.new(camera.CFrame.Position, lockOnTarget.Position)
+        else
+            lockOnTarget = getClosestPlayer()
+        end
+    else
+        lockOnTarget = getClosestPlayer()
+    end
+end)
+
+
+CombatTab:CreateSection("Mobile Aimbot")
+
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local runService = game:GetService("RunService")
+
+local aimbotEnabled = false
+local aimPart = "HumanoidRootPart"
+
+local function getNearestPlayer()
+    local closestPlayer = nil
+    local closestDistance = math.huge
+
+    for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player
+            and otherPlayer.Character
+            and otherPlayer.Character:FindFirstChild("Humanoid")
+            and otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+            and otherPlayer.Character.Humanoid.Health > 0 then
+            local distance = (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position)
+            .Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestPlayer = otherPlayer
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+local function lockCameraToPlayer()
+    local nearestPlayer = getNearestPlayer()
+    if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild(aimPart) then
+        local target = nearestPlayer.Character[aimPart]
+        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
+    end
+end
+
+runService.RenderStepped:Connect(function()
+    if aimbotEnabled then
+        lockCameraToPlayer()
+    end
+end)
+
+CombatTab:CreateToggle({
+    Name = "Enable Aimbot",
+    CurrentValue = false,
+    Flag = "AimbotToggle",
+    Callback = function(Value)
+        aimbotEnabled = Value
+    end
+})
+
+CombatTab:CreateDropdown({
+    Name = "Aim Part",
+    Options = { "HumanoidRootPart", "Head" },
+    CurrentOption = "HumanoidRootPart",
+    Flag = "AimPartDropdown",
+    Callback = function(Value)
+        aimPart = Value[1]
+    end
+})
+
+CombatTab:CreateSection("Hitbox Expander")
+
+_G.HeadSize = 50
+_G.Enabled = false
+_G.Rainbow = false
+_G.HeadColor = Color3.fromRGB(0, 0, 255)
+
+local function getRainbowColor()
+    local t = tick() * 2
+    return Color3.fromHSV((t % 5) / 5, 1, 1)
+end
+
+CombatTab:CreateToggle({
+    Name = "Enable Hitbox",
+    CurrentValue = false,
+    Flag = "EnableScript",
+    Callback = function(Value)
+        _G.Enabled = Value
+    end,
+})
+
+CombatTab:CreateSlider({
+    Name = "Hitbox Size",
+    Range = { 5, 100 },
+    Increment = 1,
+    Suffix = "size",
+    CurrentValue = 50,
+    Flag = "SizeSlider",
+    Callback = function(Value)
+        _G.HeadSize = Value
+    end,
+})
+
+CombatTab:CreateColorPicker({
+    Name = "Hitbox ColorPicker",
+    Color = Color3.fromRGB(0, 0, 255),
+    Flag = "ColorPicker",
+    Callback = function(Value)
+        _G.HeadColor = Value
+    end,
+})
+
+CombatTab:CreateToggle({
+    Name = "Rainbow Hitbox",
+    CurrentValue = false,
+    Flag = "RainbowToggle",
+    Callback = function(Value)
+        _G.Rainbow = Value
+    end,
+})
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if _G.Enabled then
+        for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
+            if v ~= game:GetService("Players").LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                pcall(function()
+                    local part = v.Character.HumanoidRootPart
+                    part.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+                    part.Transparency = 0.7
+                    part.BrickColor = BrickColor.new(_G.Rainbow and getRainbowColor() or _G.HeadColor)
+                    part.Material = Enum.Material.Neon
+                    part.CanCollide = false
+                end)
+            end
+        end
+    end
+end)
+
+
+CombatTab:CreateSection("FOV Circle")
+
+local sides = 0
+local radius = 100
+local enabled = false
+
+local fovCircle = Drawing.new("Circle")
+fovCircle.Color = Color3.fromRGB(255, 255, 255)
+fovCircle.Thickness = 2
+fovCircle.NumSides = 300
+fovCircle.Transparency = 1
+fovCircle.Visible = false
+fovCircle.Filled = false
+fovCircle.Radius = radius
+
+local lines = {}
+
+local function createLines(num)
+    for _, line in pairs(lines) do
+        line:Remove()
+    end
+    lines = {}
+
+    for i = 1, num do
+        local line = Drawing.new("Line")
+        line.Color = Color3.fromRGB(255, 255, 255)
+        line.Thickness = 2
+        line.Transparency = 1
+        line.Visible = false
+        table.insert(lines, line)
+    end
+end
+
+if sides > 0 then
+    createLines(sides)
 else
-    local errMsg = tostring(result)
-    F9Notification("Failed to load UI: " .. errMsg)
-    warn("❌ Failed to load UI:", errMsg)
+    createLines(0)
 end
+
+local function updatePolygon(position, radius, sides)
+    for i = 1, sides do
+        local angle1 = (2 * math.pi / sides) * (i - 1) - math.pi / 2
+        local angle2 = (2 * math.pi / sides) * (i % sides) - math.pi / 2
+
+        local p1 = Vector2.new(position.X + radius * math.cos(angle1), position.Y + radius * math.sin(angle1))
+        local p2 = Vector2.new(position.X + radius * math.cos(angle2), position.Y + radius * math.sin(angle2))
+
+        lines[i].From = p1
+        lines[i].To = p2
+        lines[i].Visible = enabled
+    end
+end
+
+local function hidePolygon()
+    for _, line in pairs(lines) do
+        line.Visible = false
+    end
+end
+
+CombatTab:CreateToggle({
+    Name = "Enable FOV Circle",
+    CurrentValue = false,
+    Flag = "EnableFOVShape",
+    Callback = function(val)
+        enabled = val
+        if enabled then
+            if sides == 0 then
+                fovCircle.Visible = true
+                hidePolygon()
+            else
+                fovCircle.Visible = false
+                for _, line in pairs(lines) do
+                    line.Visible = true
+                end
+            end
+        else
+            fovCircle.Visible = false
+            hidePolygon()
+        end
+    end,
+})
+
+CombatTab:CreateSlider({
+    Name = "Sides",
+    Range = { 0, 40 },
+    Increment = 1,
+    Suffix = "%",
+    CurrentValue = sides,
+    Flag = "SidesSlider",
+    Callback = function(val)
+        sides = val
+        if sides == 0 then
+            fovCircle.Visible = enabled
+            hidePolygon()
+        elseif sides >= 3 then
+            fovCircle.Visible = false
+            createLines(sides)
+            if enabled then
+                for _, line in pairs(lines) do
+                    line.Visible = true
+                end
+            end
+        else
+            sides = 0
+            fovCircle.Visible = enabled
+            hidePolygon()
+        end
+    end,
+})
+
+CombatTab:CreateSlider({
+    Name = "Radius",
+    Range = { 10, 300 },
+    Increment = 1,
+    Suffix = "%",
+    CurrentValue = radius,
+    Flag = "RadiusSlider",
+    Callback = function(val)
+        radius = val
+        fovCircle.Radius = radius
+    end,
+})
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if enabled then
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        local pos = Vector2.new(mouse.X, mouse.Y)
+        if sides == 0 then
+            fovCircle.Position = pos
+            fovCircle.Radius = radius
+            fovCircle.Visible = true
+            hidePolygon()
+        else
+            updatePolygon(pos, radius, sides)
+            fovCircle.Visible = false
+        end
+    else
+        fovCircle.Visible = false
+        hidePolygon()
+    end
+end)
+
+
+CombatTab:CreateSection("Snap Lines")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+local FOVRadius = 150
+local MaxDistance = 300
+local AimPartName = "HumanoidRootPart"
+local arrowColor = Color3.fromRGB(255, 0, 0)
+local arrowEnabled = false
+
+local arrow = Drawing.new("Line")
+arrow.Visible = false
+arrow.Thickness = 2
+arrow.Color = arrowColor
+
+local function isInFOV(player)
+    local char = player.Character
+    if not char then return false end
+
+    local part = char:FindFirstChild("Head")
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not part or not humanoid or humanoid.Health <= 0 then return false end
+
+    local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+    if not onScreen then return false end
+
+    local mousePos = UserInputService:GetMouseLocation()
+    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+    return dist <= FOVRadius
+end
+
+local function getClosestPlayer()
+    local closest = nil
+    local shortest = MaxDistance
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local char = player.Character
+            local hrp = char:FindFirstChild(AimPartName)
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+            if hrp and humanoid and humanoid.Health > 0 and isInFOV(player) then
+                local dist = (LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    closest = player
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+RunService.RenderStepped:Connect(function()
+    if not arrowEnabled then
+        arrow.Visible = false
+        return
+    end
+
+    local target = getClosestPlayer()
+    if target and target.Character then
+        local part = target.Character:FindFirstChild(AimPartName)
+        if part then
+            local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+
+            if onScreen then
+                local mousePos = UserInputService:GetMouseLocation()
+                arrow.From = mousePos
+                arrow.To = Vector2.new(screenPos.X, screenPos.Y)
+                arrow.Color = arrowColor
+                arrow.Visible = true
+                return
+            end
+        end
+    end
+
+    arrow.Visible = false
+end)
+
+CombatTab:CreateToggle({
+    Name = "Enable Snapline",
+    CurrentValue = false,
+    Callback = function(value)
+        arrowEnabled = value
+        if not value then
+            arrow.Visible = false
+        end
+    end
+})
+
+CombatTab:CreateColorPicker({
+    Name = "Snapline Colorpicker",
+    Color = arrowColor,
+    Callback = function(color)
+        arrowColor = color
+    end
+})
+
+CombatTab:CreateSection("TriggerBot")
+
+local player = game:GetService("Players").LocalPlayer
+local mouse = player:GetMouse()
+local runService = game:GetService("RunService")
+
+local autoClickEnabled = false
+local clickDelay = 0.1
+
+CombatTab:CreateToggle({
+    Name = "TriggerBot",
+    CurrentValue = false,
+    Callback = function(Value)
+        autoClickEnabled = Value
+    end,
+})
+
+CombatTab:CreateSlider({
+    Name = "Clicking Delay",
+    Range = { 0.05, 1 },
+    Increment = 0.05,
+    Suffix = "s",
+    CurrentValue = 0.1,
+    Callback = function(Value)
+        clickDelay = Value
+    end,
+})
+
+task.spawn(function()
+    while true do
+        if autoClickEnabled and mouse.Target and mouse.Target.Parent:FindFirstChild("Humanoid") and mouse.Target.Parent.Name ~= player.Name then
+... (56 KB left)
